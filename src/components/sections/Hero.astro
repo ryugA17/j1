@@ -4,7 +4,7 @@ import ScrollIndicator from "../shared/ScrollIndicator.astro";
 // import ScrollTriggerContainer from "../shared/ScrollTriggerContainer.astro"; // No longer used for widgets
 import ScrollTrigger from "../shared/ScrollTrigger.astro"; // Still used for circles.json
 import ScrollJack from "../shared/ScrollJack.astro"; // Added for scroll jacking
-// Removed: import { initHeroWidgetsAnimation } from "/src/scripts/heroWidgetsScroller.js";
+// Removed: import { initHeroWidgetsAnimation } from "/scripts/heroWidgetsScroller.js";
 ---
 
 
@@ -96,12 +96,9 @@ import ScrollJack from "../shared/ScrollJack.astro"; // Added for scroll jacking
       </div>
     </div>
 
-    <!-- Scroll indicator appears at the bottom -->
-    <ScrollIndicator text="Scroll to explore" showAfterAnimation={false} />
-    
-    <!-- Scroll indicator for scroll jacking -->
+    <!-- Only keep the scroll-jack-indicator and remove the ScrollIndicator -->
     <div class="scroll-jack-indicator">
-      <span class="scroll-text">Scroll to animate</span>
+      <span class="scroll-text">Scroll to explore</span>
       <div class="scroll-arrow">↓</div>
     </div>
   </div>
@@ -112,8 +109,11 @@ import ScrollJack from "../shared/ScrollJack.astro"; // Added for scroll jacking
   src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"
   type="module"></script>
 
+<!-- Load Lottie library from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+
 <script type="module">
-  import { initHeroWidgetsAnimation } from "/src/scripts/heroWidgetsScroller.js"; // Added import here
+  import { initHeroWidgetsAnimation } from "/scripts/heroWidgetsScroller.js";
 
   document.addEventListener('DOMContentLoaded', () => {
     console.log("Hero: Component initialized");
