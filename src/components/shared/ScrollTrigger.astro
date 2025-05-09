@@ -88,6 +88,9 @@ const {
       this.lastScrollTop = 0;
       this.scrollDirection = 'down';
 
+      this.actualSegmentStart = this.startFrame;
+      this.actualSegmentEnd = this.endFrame !== null ? this.endFrame : this.totalFrames;
+
       this.init();
     }
 
@@ -125,14 +128,27 @@ const {
       this.animation.addEventListener('DOMLoaded', () => {
         this.totalFrames = this.animation.totalFrames;
         
-        if (!this.endFrame || this.endFrame > this.totalFrames) {
-          this.endFrame = this.totalFrames;
+        // Determine segment boundaries for animation scrubbing
+        const startFramePropStr = this.element.dataset.startFrame;
+        const endFramePropStr = this.element.dataset.endFrame;
+
+        // Initialize with values parsed in constructor (numeric or default 0 for startFrame)
+        this.actualSegmentStart = this.startFrame; 
+        // Initialize with value parsed in constructor (numeric or null) or default to totalFrames
+        this.actualSegmentEnd = this.endFrame !== null ? this.endFrame : this.totalFrames;
+
+        if (startFramePropStr && typeof startFramePropStr === 'string' && startFramePropStr.toLowerCase() === "last") {
+          this.actualSegmentStart = this.totalFrames; 
+        }
+        
+        if (endFramePropStr && typeof endFramePropStr === 'string' && endFramePropStr.toLowerCase() === "first") {
+          this.actualSegmentEnd = 0;
         }
         
         if (this.debug) {
           console.log(`Animation loaded: ${this.animationPath}`);
-          console.log(`Total frames: ${this.totalFrames}`);
-          console.log(`Using frames: ${this.startFrame} to ${this.endFrame}`);
+          console.log(`Total Lottie frames: ${this.totalFrames}`);
+          console.log(`Scrubbing segment: From frame ${this.actualSegmentStart} to frame ${this.actualSegmentEnd}`);
         }
 
         this.initObserver();
@@ -261,9 +277,9 @@ const {
         const scrollFactor = 0.3; // Use first 30% of page scroll for animation
         const scrollPercentage = Math.min(scrollTop / (scrollHeight * scrollFactor), 1);
         
-        // Map scroll percentage to frame range
-        const frameRange = this.endFrame - this.startFrame;
-        const targetFrame = this.startFrame + (frameRange * scrollPercentage);
+        // Map scroll percentage to frame range using actualSegmentStart/End
+        const frameRange = this.actualSegmentEnd - this.actualSegmentStart;
+        const targetFrame = this.actualSegmentStart + (frameRange * scrollPercentage);
         
         // Update animation to the calculated frame
         if (this.animation && Math.abs(this.currentFrame - targetFrame) > 0.5) {
@@ -311,7 +327,8 @@ const {
       if (this.scrub && !this.frameByFrame) {
         // Calculate animation progress based on intersection ratio
         this.progress = entry.intersectionRatio;
-        const frame = this.startFrame + (this.endFrame - this.startFrame) * this.progress;
+        // Use actualSegmentStart and actualSegmentEnd for frame calculation
+        const frame = this.actualSegmentStart + (this.actualSegmentEnd - this.actualSegmentStart) * this.progress;
         this.animation.goToAndStop(frame, true);
       } else if (!this.frameByFrame) {
         // Play from where we left off
