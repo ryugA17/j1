@@ -29,6 +29,7 @@ import ScrollTrigger from "../shared/ScrollTrigger.astro";
       debug={false}
       startFrame="LAST"
       endFrame="FIRST"
+      scale={0.7}
     />
   </div>
 
@@ -120,6 +121,22 @@ import ScrollTrigger from "../shared/ScrollTrigger.astro";
 
     // Set up scroll reveal elements
     setupScrollReveal();
+
+    // Fade hero content based on scroll position
+    const heroContent = document.querySelector('.hero-content');
+
+    function handleHeroContentScrollFade() {
+      if (heroContent) { // Ensure heroContent exists
+        if (window.scrollY > 10) {
+          heroContent.classList.add('fade-out-on-scroll');
+        } else {
+          heroContent.classList.remove('fade-out-on-scroll');
+        }
+      }
+    }
+    window.addEventListener('scroll', handleHeroContentScrollFade);
+    // Initial check in case the page loads scrolled down (though unlikely for hero)
+    handleHeroContentScrollFade();
     
     // Handle cloud provider selection
     function setupCloudSelection() {
@@ -257,22 +274,18 @@ import ScrollTrigger from "../shared/ScrollTrigger.astro";
     height: 100%;
     z-index: 1;
     pointer-events: none;
-    opacity: 1; /* Increased from 0.7 to 1 for better visibility */
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    opacity: 1; /* Maintained full opacity */
+    display: flex; /* Restored for centering Lottie content if Lottie is smaller than container */
+    align-items: center; /* Restored */
+    justify-content: center; /* Restored */
   }
   
   /* Make sure SVG is properly centered */
   .widgets-container :global(svg) {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    width: 100% !important;
+    height: 100% !important;
     max-width: 100%;
     max-height: 100%;
-    width: auto !important;
-    height: auto !important;
     visibility: visible !important;
     opacity: 1 !important;
     display: block !important;
@@ -301,6 +314,15 @@ import ScrollTrigger from "../shared/ScrollTrigger.astro";
     text-align: center;
     color: var(--color-white);
     margin-bottom: 5rem;
+    position: relative; /* Added for z-index context if needed and for transform */
+    z-index: 2; /* Ensure it's above widgets-container (z-index: 1) but potentially below navbar */
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out; /* Added for fade-out animation */
+  }
+
+  .hero-content.fade-out-on-scroll {
+    opacity: 0;
+    transform: translateY(-30px); 
+    pointer-events: none;
   }
 
   .hero-content h1 {
