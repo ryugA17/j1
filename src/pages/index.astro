@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import Navbar from "../components/shared/Navbar.astro";
 import Hero from "../components/sections/Hero.astro";
+import AnimatedHero from "../components/sections/AnimatedHero.astro";
 import StrongFoundations from "../components/sections/StrongFoundations.astro";
 import Footer from "../components/sections/Footer.astro";
 import WhyUs from "../components/sections/WhyUs.astro";
@@ -13,18 +14,18 @@ import Moduledetails from "../components/sections/Moduledetails.astro";
 ---
 
 <Layout>
-  <Navbar />
-  <Hero />
-  <main style="z-index: 5; position: relative;">
-    <Container>
-      <CloudNavbar />
-      <StrongFoundations />
-      <WhyUs />
-      
-      
-      <Pricing />
-    </Container>
-    <YellowSection />
-    <Footer />
-  </main>
+  <div class="scroll-snap-container">
+    <Navbar />
+    <Hero />
+    <main style="z-index: 5; position: relative;">
+      <Container>
+        <CloudNavbar />
+        <StrongFoundations />
+        <WhyUs />
+        <Pricing />
+      </Container>
+      <YellowSection />
+      <Footer />
+    </main>
+  </div>
 </Layout>

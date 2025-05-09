@@ -87,6 +87,51 @@ const {
     color: var(--color-foreground);
     overscroll-behavior: none; /* Prevent bounce effect on mobile */
     scroll-behavior: smooth; /* Enable smooth scrolling for browsers that support it */
+    scrollbar-width: thin; /* For Firefox */
+    height: 100%;
+  }
+
+  /* Custom scrollbar styles for webkit browsers */
+  body::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  body::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+  }
+  
+  body::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+  }
+  
+  /* ScrollJack related styles */
+  body.scroll-locked {
+    overflow: hidden;
+    height: 100vh;
+  }
+  
+  /* Improved section transitions */
+  section {
+    scroll-margin-top: 0px;
+    position: relative;
+  }
+  
+  /* Support for scroll snapping */
+  .scroll-snap-container {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    height: 100vh;
+  }
+  
+  section.scroll-snap-section {
+    scroll-snap-align: start;
+    height: 100vh;
+  }
+  
+  /* Disable scroll snapping when animation completes */
+  section.animation-completed {
+    scroll-snap-align: none;
   }
 
   /* ==========================================================================

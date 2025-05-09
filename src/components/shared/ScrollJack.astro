@@ -29,7 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
     completedSections: new Set(),
     sectionAnimationProgress: 0,
     targetSection: null,
-    nextSection: null
+    nextSection: null,
+    animationSteps: 100, // Total animation steps to complete
+    currentStep: 0       // Current animation step
   };
   
   // Get references to important elements
@@ -114,13 +116,43 @@ document.addEventListener('DOMContentLoaded', () => {
           detail: { direction: 'down', delta: Math.abs(deltaY) }
         });
         targetSection.dispatchEvent(customEvent);
+        
+        // Increment current step for animation progress
+        state.currentStep = Math.min(state.currentStep + 1, state.animationSteps);
+        
+        // If we've reached the end of animation steps, allow scrolling
+        if (state.currentStep >= state.animationSteps) {
+          state.allowScrolling = true;
+          state.isScrollLocked = false;
+          
+          // Trigger animation complete if not already done
+          if (!state.isAnimationComplete) {
+            handleAnimationComplete();
+          }
+        }
       } else if (deltaY < 0) {
         // Scrolling up in the target section
         const customEvent = new CustomEvent('scroll-jack-step', {
           detail: { direction: 'up', delta: Math.abs(deltaY) }
         });
         targetSection.dispatchEvent(customEvent);
+        
+        // Decrement current step for animation progress
+        state.currentStep = Math.max(state.currentStep - 1, 0);
       }
+
+      // Update animation progress
+      state.sectionAnimationProgress = state.currentStep / state.animationSteps;
+      
+      // Dispatch progress event
+      const progressEvent = new CustomEvent('scroll-jack-progress', {
+        detail: { 
+          progress: state.sectionAnimationProgress,
+          step: state.currentStep,
+          totalSteps: state.animationSteps
+        }
+      });
+      targetSection.dispatchEvent(progressEvent);
     }
   }
   
@@ -147,13 +179,43 @@ document.addEventListener('DOMContentLoaded', () => {
             detail: { direction: 'down', delta: Math.abs(deltaY) }
           });
           targetSection.dispatchEvent(customEvent);
+          
+          // Increment current step for animation progress
+          state.currentStep = Math.min(state.currentStep + 1, state.animationSteps);
+          
+          // If we've reached the end of animation steps, allow scrolling
+          if (state.currentStep >= state.animationSteps) {
+            state.allowScrolling = true;
+            state.isScrollLocked = false;
+            
+            // Trigger animation complete if not already done
+            if (!state.isAnimationComplete) {
+              handleAnimationComplete();
+            }
+          }
         } else {
           // Swiping down (scrolling up)
           const customEvent = new CustomEvent('scroll-jack-step', {
             detail: { direction: 'up', delta: Math.abs(deltaY) }
           });
           targetSection.dispatchEvent(customEvent);
+          
+          // Decrement current step for animation progress
+          state.currentStep = Math.max(state.currentStep - 1, 0);
         }
+        
+        // Update animation progress
+        state.sectionAnimationProgress = state.currentStep / state.animationSteps;
+        
+        // Dispatch progress event
+        const progressEvent = new CustomEvent('scroll-jack-progress', {
+          detail: { 
+            progress: state.sectionAnimationProgress,
+            step: state.currentStep,
+            totalSteps: state.animationSteps
+          }
+        });
+        targetSection.dispatchEvent(progressEvent);
         
         // Update touch reference
         touchStartY = touchY;
@@ -178,6 +240,21 @@ document.addEventListener('DOMContentLoaded', () => {
             detail: { direction: 'down', delta }
           });
           targetSection.dispatchEvent(customEvent);
+          
+          // Increment current step for animation progress
+          const stepIncrement = e.code === 'PageDown' ? 5 : 1;
+          state.currentStep = Math.min(state.currentStep + stepIncrement, state.animationSteps);
+          
+          // If we've reached the end of animation steps, allow scrolling
+          if (state.currentStep >= state.animationSteps) {
+            state.allowScrolling = true;
+            state.isScrollLocked = false;
+            
+            // Trigger animation complete if not already done
+            if (!state.isAnimationComplete) {
+              handleAnimationComplete();
+            }
+          }
         } else if (['ArrowUp', 'PageUp'].includes(e.code)) {
           // Scrolling up
           const delta = e.code === 'PageUp' ? 100 : 30;
@@ -185,7 +262,24 @@ document.addEventListener('DOMContentLoaded', () => {
             detail: { direction: 'up', delta }
           });
           targetSection.dispatchEvent(customEvent);
+          
+          // Decrement current step for animation progress
+          const stepDecrement = e.code === 'PageUp' ? 5 : 1;
+          state.currentStep = Math.max(state.currentStep - stepDecrement, 0);
         }
+        
+        // Update animation progress
+        state.sectionAnimationProgress = state.currentStep / state.animationSteps;
+        
+        // Dispatch progress event
+        const progressEvent = new CustomEvent('scroll-jack-progress', {
+          detail: { 
+            progress: state.sectionAnimationProgress,
+            step: state.currentStep,
+            totalSteps: state.animationSteps
+          }
+        });
+        targetSection.dispatchEvent(progressEvent);
       }
     }
   }
@@ -323,5 +417,33 @@ document.addEventListener('DOMContentLoaded', () => {
 <style>
   .scroll-jack {
     display: none;
+  }
+  
+  :global(html) {
+    scroll-behavior: smooth;
+  }
+  
+  :global(body) {
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+  }
+  
+  :global(body.scroll-locked) {
+    overflow: hidden;
+    height: 100vh;
+  }
+  
+  :global(section.animation-completed) {
+    scroll-snap-align: none;
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    :global(html) {
+      scroll-behavior: auto;
+    }
+    
+    :global(body) {
+      scroll-behavior: auto;
+    }
   }
 </style> 

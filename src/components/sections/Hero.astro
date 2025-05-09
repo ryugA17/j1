@@ -3,10 +3,14 @@ import Button from "../shared/Button.astro";
 import ScrollIndicator from "../shared/ScrollIndicator.astro";
 // import ScrollTriggerContainer from "../shared/ScrollTriggerContainer.astro"; // No longer used for widgets
 import ScrollTrigger from "../shared/ScrollTrigger.astro"; // Still used for circles.json
+import ScrollJack from "../shared/ScrollJack.astro"; // Added for scroll jacking
 // Removed: import { initHeroWidgetsAnimation } from "/src/scripts/heroWidgetsScroller.js";
 ---
 
-<section class="hero" id="hero-section">
+
+<section class="hero scroll-snap-section" id="hero-section">
+  <ScrollJack targetSectionId="hero-section" />
+  
   <div class="hero-pinned-content">
     <!-- Background animation with circles.json -->
     <div class="hero-background">
@@ -18,6 +22,9 @@ import ScrollTrigger from "../shared/ScrollTrigger.astro"; // Still used for cir
         debug={false}
         onEnter="hero-animation-started"
         onLeave="hero-animation-complete"
+        frameByFrame={true}
+        autoplay={false}
+        id="circles-animation"
       />
     </div>
 
@@ -91,6 +98,12 @@ import ScrollTrigger from "../shared/ScrollTrigger.astro"; // Still used for cir
 
     <!-- Scroll indicator appears at the bottom -->
     <ScrollIndicator text="Scroll to explore" showAfterAnimation={false} />
+    
+    <!-- Scroll indicator for scroll jacking -->
+    <div class="scroll-jack-indicator">
+      <span class="scroll-text">Scroll to animate</span>
+      <div class="scroll-arrow">↓</div>
+    </div>
   </div>
 </section>
 
@@ -104,6 +117,9 @@ import ScrollTrigger from "../shared/ScrollTrigger.astro"; // Still used for cir
 
   document.addEventListener('DOMContentLoaded', () => {
     console.log("Hero: Component initialized");
+    
+    // Add scroll-locked class to body initially
+    document.body.classList.add('scroll-locked');
     
     const heroSection = document.getElementById('hero-section');
     if (!heroSection) {
@@ -123,11 +139,164 @@ import ScrollTrigger from "../shared/ScrollTrigger.astro"; // Still used for cir
     setupCloudSelection();
     setupScrollReveal();
 
+    // Track animation progress
+    let animationComplete = false;
+    let heroWidgetAnimation = null;
+    let circlesAnimation = null;
+    
     // Initialize the new Lottie scroll animation for widgets
-    initHeroWidgetsAnimation('hero-widgets-animation-target');
+    heroWidgetAnimation = initHeroWidgetsAnimation('hero-widgets-animation-target');
+    
+    // Get the circles animation instance
+    const circlesElement = document.querySelector('#circles-animation');
+    if (circlesElement && circlesElement.animation) {
+      circlesAnimation = circlesElement.animation;
+      console.log('Circles animation found');
+    } else {
+      // Wait for animation to be initialized
+      document.addEventListener('animation-loaded', (e) => {
+        if (e.detail.element.id === 'circles-animation') {
+          circlesAnimation = e.detail.animation;
+          console.log('Circles animation loaded and ready');
+        }
+      });
+    }
+    
+    // Listen for scroll-jack events to control animation frame-by-frame
+    if (heroSection) {
+      heroSection.addEventListener('scroll-jack-step', (e) => {
+        const { direction, delta } = e.detail;
+        // Increase step size for faster scrolling (changed from 20 to 10)
+        const stepSize = Math.max(2, Math.floor(delta / 10)); 
+        
+        // Show hero content when scrolling up
+        const heroContent = document.querySelector('.hero-content');
+        if (heroContent) {
+          if (direction === 'up') {
+            heroContent.classList.remove('fade-out-on-scroll');
+          } else {
+            heroContent.classList.add('fade-out-on-scroll');
+          }
+        }
+        
+        // Update widgets animation
+        if (heroWidgetAnimation) {
+          let newFrame = heroWidgetAnimation.currentFrame || 0;
+          const totalFrames = heroWidgetAnimation.totalFrames || 100;
+          
+          if (direction === 'down') {
+            newFrame = Math.min(newFrame + stepSize, totalFrames);
+          } else {
+            newFrame = Math.max(newFrame - stepSize, 0);
+          }
+          
+          // Update widgets animation frame
+          heroWidgetAnimation.goToAndStop(newFrame, true);
+        }
+        
+        // Update circles animation
+        if (circlesAnimation) {
+          let circlesFrame = circlesAnimation.currentFrame || 0;
+          const circlesTotalFrames = circlesAnimation.totalFrames || 100;
+          
+          if (direction === 'down') {
+            circlesFrame = Math.min(circlesFrame + stepSize, circlesTotalFrames);
+          } else {
+            circlesFrame = Math.max(circlesFrame - stepSize, 0);
+          }
+          
+          // Update circles animation frame
+          circlesAnimation.goToFrame(circlesFrame);
+        }
+      });
+      
+      // Listen for scroll-jack progress events
+      heroSection.addEventListener('scroll-jack-progress', (e) => {
+        const { progress, step, totalSteps } = e.detail;
+        
+        // Handle hero content visibility based on progress direction
+        const heroContent = document.querySelector('.hero-content');
+        if (heroContent) {
+          // If we're near the start of the animation and progressing backward, show content
+          if (progress < 0.1) {
+            heroContent.classList.remove('fade-out-on-scroll');
+          } else {
+            heroContent.classList.add('fade-out-on-scroll');
+          }
+        }
+        
+        // Update widgets animation
+        if (heroWidgetAnimation) {
+          const totalFrames = heroWidgetAnimation.totalFrames || 100;
+          const targetFrame = Math.floor(progress * totalFrames);
+          
+          // Update animation frame based on progress
+          heroWidgetAnimation.goToAndStop(targetFrame, true);
+        }
+        
+        // Update circles animation
+        if (circlesAnimation) {
+          const circlesTotalFrames = circlesAnimation.totalFrames || 100;
+          const circlesTargetFrame = Math.floor(progress * circlesTotalFrames);
+          
+          // Update circles animation frame based on progress
+          circlesAnimation.goToFrame(circlesTargetFrame);
+        }
+        
+        // If we're at the end of the animation, mark as complete
+        if (progress >= 0.95 && !animationComplete) {
+          animationComplete = true;
+          
+          // Remove scroll-locked class from body
+          document.body.classList.remove('scroll-locked');
+          
+          // Add animation completed class
+          heroSection.classList.add('animation-completed');
+          
+          // Dispatch animation completed event
+          const completeEvent = new CustomEvent('hero-animation-complete', {
+            bubbles: true
+          });
+          document.dispatchEvent(completeEvent);
+        }
+      });
+      
+      // Listen for animation completion
+      document.addEventListener('hero-animation-complete', () => {
+        console.log('Hero animation completed');
+        animationComplete = true;
+        
+        // Remove scroll-locked class
+        document.body.classList.remove('scroll-locked');
+        
+        // Hide scroll jack indicator and show regular scroll indicator
+        const scrollJackIndicator = document.querySelector('.scroll-jack-indicator');
+        if (scrollJackIndicator) {
+          scrollJackIndicator.style.display = 'none';
+        }
+        
+        // Make sure both animations are at their final frame
+        if (heroWidgetAnimation) {
+          heroWidgetAnimation.goToAndStop(heroWidgetAnimation.totalFrames || 100, true);
+        }
+        
+        if (circlesAnimation) {
+          circlesAnimation.goToFrame(circlesAnimation.totalFrames || 100);
+        }
+        
+        // Tell other components that animation is complete
+        const event = new CustomEvent('animation-complete', {
+          bubbles: true
+        });
+        heroSection.dispatchEvent(event);
+      });
+    }
     
     // Fade hero content based on scroll position
     const heroContent = document.querySelector('.hero-content');
+
+    // We've moved this functionality directly into the scroll-jack-step handler
+    // No need for a separate event listener anymore
 
     function handleHeroContentScrollFade() {
       if (heroContent) { // Ensure heroContent exists
@@ -139,8 +308,6 @@ import ScrollTrigger from "../shared/ScrollTrigger.astro"; // Still used for cir
       }
     }
     window.addEventListener('scroll', handleHeroContentScrollFade);
-    // Initial check in case the page loads scrolled down (though unlikely for hero)
-    handleHeroContentScrollFade();
     
     // Handle cloud provider selection
     function setupCloudSelection() {
@@ -562,5 +729,44 @@ import ScrollTrigger from "../shared/ScrollTrigger.astro"; // Still used for cir
     .hero p {
       font-size: clamp(1rem, 2vw, 1.2rem);
     }
+  }
+
+  /* Scroll Jack Indicator */
+  .scroll-jack-indicator {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+    opacity: 0.8;
+    animation: pulse 2s infinite;
+    z-index: 10;
+  }
+  
+  .scroll-jack-indicator .scroll-text {
+    font-size: 14px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  .scroll-jack-indicator .scroll-arrow {
+    font-size: 20px;
+    animation: bounce 1.5s infinite;
+  }
+  
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+  }
+  
+  @keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
   }
 </style>

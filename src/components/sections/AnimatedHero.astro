@@ -39,6 +39,9 @@ const animationPath = `/animations/${animation}.json`;
         debug={debug}
         onEnter="hero-animation-started"
         onLeave="hero-animation-completed"
+        frameByFrame={true}
+        autoplay={false}
+        id="hero-animation"
       />
     </div>
   </div>
@@ -51,6 +54,9 @@ const animationPath = `/animations/${animation}.json`;
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // Add scroll-locked class to body initially
+    document.body.classList.add('scroll-locked');
+    
     // Get the reveal elements
     const revealElements = document.querySelectorAll('.reveal-element');
     
@@ -66,6 +72,22 @@ const animationPath = `/animations/${animation}.json`;
     // Track animation progress
     let animationComplete = false;
     
+    // Get the scroll trigger animation instance
+    let heroAnimation = null;
+    const scrollTriggerElement = document.querySelector('#hero-animation');
+    
+    if (scrollTriggerElement && scrollTriggerElement.animation) {
+      heroAnimation = scrollTriggerElement.animation;
+    } else {
+      // Wait for animation to be initialized
+      document.addEventListener('animation-loaded', (e) => {
+        if (e.detail.element.id === 'hero-animation') {
+          heroAnimation = e.detail.animation;
+          console.log('Hero animation loaded and ready');
+        }
+      });
+    }
+    
     // Listen for animation completion
     document.addEventListener('hero-animation-completed', () => {
       console.log('Hero animation completed');
@@ -76,6 +98,9 @@ const animationPath = `/animations/${animation}.json`;
       if (scrollIndicator) {
         scrollIndicator.classList.add('show-indicator');
       }
+      
+      // Remove scroll-locked class from body
+      document.body.classList.remove('scroll-locked');
       
       // Send a custom event to notify other components
       const event = new CustomEvent('animation-complete', {
@@ -88,62 +113,88 @@ const animationPath = `/animations/${animation}.json`;
       }
     });
     
-    // Add scroll event to handle scroll behavior
-    window.addEventListener('wheel', (e) => {
-      if (!animationComplete) {
-        // If animation is not complete, trigger a custom event for ScrollJack
-        const customEvent = new CustomEvent('scroll-jack-step', {
-          detail: { 
-            direction: e.deltaY > 0 ? 'down' : 'up', 
-            delta: Math.abs(e.deltaY) 
-          }
-        });
+    // Listen for scroll-jack events to control animation frame-by-frame
+    const heroSection = document.getElementById('hero-section');
+    if (heroSection) {
+      heroSection.addEventListener('scroll-jack-step', (e) => {
+        if (!heroAnimation) return;
         
-        const heroSection = document.getElementById('hero-section');
-        if (heroSection) {
-          heroSection.dispatchEvent(customEvent);
+        const { direction, delta } = e.detail;
+        const totalFrames = heroAnimation.totalFrames || 100;
+        const stepSize = Math.max(1, Math.floor(delta / 20)); // Convert wheel delta to reasonable frame steps
+        
+        let newFrame = heroAnimation.currentFrame || 0;
+        
+        if (direction === 'down') {
+          newFrame = Math.min(newFrame + stepSize, totalFrames);
+        } else {
+          newFrame = Math.max(newFrame - stepSize, 0);
         }
-      }
-    }, { passive: false });
+        
+        // Update the animation frame
+        heroAnimation.goToFrame(newFrame);
+      });
+      
+      // Listen for scroll-jack progress events
+      heroSection.addEventListener('scroll-jack-progress', (e) => {
+        if (!heroAnimation) return;
+        
+        const { progress } = e.detail;
+        const totalFrames = heroAnimation.totalFrames || 100;
+        const targetFrame = Math.floor(progress * totalFrames);
+        
+        // Update animation frame based on progress
+        heroAnimation.goToFrame(targetFrame);
+        
+        // If we're at the end of the animation, mark as complete
+        if (progress >= 0.95 && !animationComplete) {
+          animationComplete = true;
+          
+          // Remove scroll-locked class from body
+          document.body.classList.remove('scroll-locked');
+          
+          // Dispatch animation completed event
+          const completeEvent = new CustomEvent('hero-animation-completed', {
+            bubbles: true,
+            detail: { element: scrollTriggerElement }
+          });
+          document.dispatchEvent(completeEvent);
+        }
+      });
+    }
   });
 </script>
 
 <style>
   .animated-hero {
     position: relative;
-    width: 100%;
     height: 100vh;
+    width: 100%;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-    background-color: #0f0f1a;
     color: white;
+    background-color: #050505;
+    scroll-snap-align: start;
+    z-index: 10;
   }
   
   .hero-content {
     position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 1;
+    z-index: 20;
+    text-align: center;
+    max-width: 800px;
+    padding: 2rem;
   }
   
   .hero-text {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-    padding: 2rem;
-    max-width: 800px;
+    transition: opacity 0.5s ease;
   }
   
   .hero-title {
-    font-size: 3.5rem;
-    line-height: 1.2;
+    font-size: clamp(2rem, 5vw, 4rem);
     margin-bottom: 1rem;
     opacity: 0;
     transform: translateY(30px);
@@ -151,8 +202,7 @@ const animationPath = `/animations/${animation}.json`;
   }
   
   .hero-subtitle {
-    font-size: 1.5rem;
-    line-height: 1.5;
+    font-size: clamp(1rem, 2vw, 1.5rem);
     opacity: 0;
     transform: translateY(30px);
     transition: opacity 0.8s ease, transform 0.8s ease;
@@ -170,7 +220,7 @@ const animationPath = `/animations/${animation}.json`;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 0;
+    z-index: 10;
   }
   
   .scroll-indicator {
@@ -182,7 +232,8 @@ const animationPath = `/animations/${animation}.json`;
     flex-direction: column;
     align-items: center;
     opacity: 0;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.6s ease;
+    z-index: 30;
   }
   
   .scroll-indicator.show-indicator {
@@ -191,14 +242,13 @@ const animationPath = `/animations/${animation}.json`;
   }
   
   .indicator-text {
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    font-size: 0.875rem;
+    letter-spacing: 1px;
     margin-bottom: 0.5rem;
   }
   
   .indicator-arrow {
-    font-size: 1.5rem;
+    animation: bounce 1.5s infinite;
   }
   
   @keyframes bounce {
@@ -208,12 +258,8 @@ const animationPath = `/animations/${animation}.json`;
   }
   
   @media (max-width: 768px) {
-    .hero-title {
-      font-size: 2.5rem;
-    }
-    
-    .hero-subtitle {
-      font-size: 1.2rem;
+    .hero-content {
+      padding: 1rem;
     }
   }
 </style> 

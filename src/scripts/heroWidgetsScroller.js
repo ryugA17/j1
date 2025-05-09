@@ -28,30 +28,45 @@ export function initHeroWidgetsAnimation(targetElementId) {
       console.error('Scroll jacking parent (#hero-section) not found.');
       return;
     }
-
-    window.addEventListener('scroll', () => {
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      const viewportHeight = window.innerHeight;
-      
-      const heroSectionTop = heroSectionElement.offsetTop;
-      // The duration of scroll over which the animation should play is the total height of hero-section
-      // minus one viewportHeight (which is the height of the pinned content area).
-      const heroScrollableDistance = heroSectionElement.offsetHeight - viewportHeight;
-
-      if (heroScrollableDistance <= 0) {
-        // Fallback if hero-section is not taller than viewport (no scroll jacking possible)
-        const progressAtTop = Math.min(1, Math.max(0, scrollTop / viewportHeight));
-        animation.goToAndStop(progressAtTop * animation.totalFrames, true);
-        return;
-      }
-      
-      // Calculate scroll progress specifically within the hero-section's scrollable range
-      const scrollRelativeToHeroStart = Math.max(0, scrollTop - heroSectionTop);
-      let scrollPercent = Math.min(1, scrollRelativeToHeroStart / heroScrollableDistance);
-      
-      const frame = scrollPercent * animation.totalFrames;
-      animation.goToAndStop(frame, true);
-    });
+    
+    // Check if we're using scroll jacking (with ScrollJack component)
+    const isUsingScrollJack = heroSectionElement.querySelector('.scroll-jack') !== null;
+    
+    if (!isUsingScrollJack) {
+      // Original scroll-based animation control (use only if not using ScrollJack)
+      window.addEventListener('scroll', () => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const viewportHeight = window.innerHeight;
+        
+        const heroSectionTop = heroSectionElement.offsetTop;
+        const heroScrollableDistance = heroSectionElement.offsetHeight - viewportHeight;
+  
+        if (heroScrollableDistance <= 0) {
+          const progressAtTop = Math.min(1, Math.max(0, scrollTop / viewportHeight));
+          const fallbackFrame = progressAtTop * animation.totalFrames;
+          animation.goToAndStop(fallbackFrame, true);
+          // console.log('Hero Scroll Fallback:', { scrollTop, progressAtTop, fallbackFrame });
+          return;
+        }
+        
+        const scrollRelativeToHeroStart = Math.max(0, scrollTop - heroSectionTop);
+        let scrollPercent = Math.min(1, scrollRelativeToHeroStart / heroScrollableDistance);
+        
+        const frame = scrollPercent * animation.totalFrames;
+        animation.goToAndStop(frame, true);
+        // Add console log for debugging scroll jacking
+        console.log('Hero Scroll Jacking:', {
+          scrollTop,
+          heroSectionTop,
+          heroOffsetHeight: heroSectionElement.offsetHeight,
+          heroScrollableDistance,
+          scrollRelativeToHeroStart,
+          scrollPercent,
+          frame,
+          totalFrames: animation.totalFrames
+        });
+      });
+    }
   });
 
   return animation;

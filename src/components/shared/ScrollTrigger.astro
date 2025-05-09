@@ -15,6 +15,8 @@ interface Props {
   containToViewport?: boolean;
   renderer?: string;
   frameByFrame?: boolean;
+  autoplay?: boolean;
+  id?: string;
 }
 
 const {
@@ -33,6 +35,8 @@ const {
   containToViewport = false,
   renderer = "svg",
   frameByFrame = false,
+  autoplay = true,
+  id = ""
 } = Astro.props;
 ---
 
@@ -53,6 +57,8 @@ const {
   data-contain-to-viewport={containToViewport.toString()}
   data-renderer={renderer}
   data-frame-by-frame={frameByFrame.toString()}
+  data-autoplay={autoplay.toString()}
+  id={id}
 >
   <slot />
 </div>
@@ -78,6 +84,7 @@ const {
       this.containToViewport = element.dataset.containToViewport === 'true';
       this.renderer = element.dataset.renderer || 'svg';
       this.frameByFrame = element.dataset.frameByFrame === 'true';
+      this.autoplay = element.dataset.autoplay !== 'false'; // Default to true if not specified
 
       this.animation = null;
       this.observer = null;
@@ -121,7 +128,7 @@ const {
         container: this.container,
         renderer: this.renderer,
         loop: false,
-        autoplay: false,
+        autoplay: this.autoplay,
         path: this.animationPath,
       });
 
