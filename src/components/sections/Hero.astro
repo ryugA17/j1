@@ -1,91 +1,97 @@
 ---
 import Button from "../shared/Button.astro";
 import ScrollIndicator from "../shared/ScrollIndicator.astro";
-import ScrollTriggerContainer from "../shared/ScrollTriggerContainer.astro";
-import ScrollTrigger from "../shared/ScrollTrigger.astro";
+// import ScrollTriggerContainer from "../shared/ScrollTriggerContainer.astro"; // No longer used for widgets
+import ScrollTrigger from "../shared/ScrollTrigger.astro"; // Still used for circles.json
+// Removed: import { initHeroWidgetsAnimation } from "/src/scripts/heroWidgetsScroller.js";
 ---
 
 <section class="hero" id="hero-section">
-  <!-- Background animation with circles.json -->
-  <div class="hero-background">
-    <ScrollTrigger 
-      animationPath="/animations/circles.json"
-      triggerElement="#hero-section"
-      scrub={true}
-      pin={false}
-      debug={false}
-      onEnter="hero-animation-started"
-      onLeave="hero-animation-complete"
-    />
-  </div>
-
-  <!-- Widget components with controlled size -->
-  <div class="widgets-container">
-    <ScrollTrigger 
-      animationPath="/animations/widgets.json"
-      triggerElement="#hero-section"
-      scrub={true}
-      pin={true}
-      debug={false}
-      startFrame="LAST"
-      endFrame="FIRST"
-      scale={0.7}
-    />
-  </div>
-
-  <div class="content-wrapper">
-    <!-- Hero content -->
-    <div class="hero-content">
-      <h1 class="scroll-reveal" data-scroll-reveal-point="10">Engineered for speed, <br /> managed for you</h1>
-      <p class="scroll-reveal" data-scroll-reveal-point="20">Fully-managed real-time database for Amazon and Google clouds</p>
-      
-      <!-- Button -->
-      <div class="scroll-reveal button-container" data-scroll-reveal-point="30">
-        <Button>Join the preview</Button>
-      </div>
+  <div class="hero-pinned-content">
+    <!-- Background animation with circles.json -->
+    <div class="hero-background">
+      <ScrollTrigger 
+        animationPath="/animations/circles.json"
+        triggerElement="#hero-section"
+        scrub={true}
+        pin={false}
+        debug={false}
+        onEnter="hero-animation-started"
+        onLeave="hero-animation-complete"
+      />
     </div>
-    
-    <!-- UI Components side by side -->
-    <div class="ui-components">
-      <!-- Cloud provider selector -->
-      <div class="cloud-selector-container" data-scroll-trigger data-trigger-at="15" data-animation-type="fade-in">
-        <h3>Choose your cloud and region</h3>
-        <div class="cloud-options">
-          <div class="cloud-option selected" tabindex="0" role="button" aria-pressed="true">
-            <span class="cloud-name">AWS</span>
-          </div>
-          <div class="cloud-option" tabindex="0" role="button" aria-pressed="false">
-            <span class="cloud-name">Google Cloud</span>
-          </div>
+
+    <!-- Widget animation target -->
+    <div class="widgets-container" id="hero-widgets-animation-target">
+      <!-- Lottie animation will be loaded here by heroWidgetsScroller.js -->
+      <!-- Removed old ScrollTrigger for widgets.json:
+      <ScrollTrigger 
+        animationPath="/animations/widgets.json"
+        triggerElement="#hero-section"
+        scrub={true}
+        pin={true}
+        debug={false}
+        startFrame="LAST"
+        endFrame="FIRST"
+        scale={0.7} 
+      />
+      -->
+    </div>
+
+    <div class="content-wrapper">
+      <!-- Hero content -->
+      <div class="hero-content">
+        <h1 class="scroll-reveal" data-scroll-reveal-point="10">Engineered for speed, <br /> managed for you</h1>
+        <p class="scroll-reveal" data-scroll-reveal-point="20">Fully-managed real-time database for Amazon and Google clouds</p>
+        
+        <!-- Button -->
+        <div class="scroll-reveal button-container" data-scroll-reveal-point="30">
+          <Button>Join the preview</Button>
         </div>
       </div>
       
-      <!-- Database customization UI -->
-      <div class="database-customizer" data-scroll-trigger data-trigger-at="35" data-animation-type="fade-in">
-        <h3>Customize your database</h3>
-        <div class="setting-row">
-          <span>Number of Zones</span>
-          <div class="number-control">
-            <button class="decrease" aria-label="Decrease number of zones">-</button>
-            <span class="value">2</span>
-            <button class="increase" aria-label="Increase number of zones">+</button>
+      <!-- UI Components side by side -->
+      <div class="ui-components">
+        <!-- Cloud provider selector -->
+        <div class="cloud-selector-container" data-scroll-trigger data-trigger-at="15" data-animation-type="fade-in">
+          <h3>Choose your cloud and region</h3>
+          <div class="cloud-options">
+            <div class="cloud-option selected" tabindex="0" role="button" aria-pressed="true">
+              <span class="cloud-name">AWS</span>
+            </div>
+            <div class="cloud-option" tabindex="0" role="button" aria-pressed="false">
+              <span class="cloud-name">Google Cloud</span>
+            </div>
           </div>
         </div>
-        <div class="divider"></div>
-        <div class="setting-row">
-          <span>Replication Factor</span>
-          <div class="number-control">
-            <button class="decrease" aria-label="Decrease replication factor">-</button>
-            <span class="value">2</span>
-            <button class="increase" aria-label="Increase replication factor">+</button>
+        
+        <!-- Database customization UI -->
+        <div class="database-customizer" data-scroll-trigger data-trigger-at="35" data-animation-type="fade-in">
+          <h3>Customize your database</h3>
+          <div class="setting-row">
+            <span>Number of Zones</span>
+            <div class="number-control">
+              <button class="decrease" aria-label="Decrease number of zones">-</button>
+              <span class="value">2</span>
+              <button class="increase" aria-label="Increase number of zones">+</button>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="setting-row">
+            <span>Replication Factor</span>
+            <div class="number-control">
+              <button class="decrease" aria-label="Decrease replication factor">-</button>
+              <span class="value">2</span>
+              <button class="increase" aria-label="Increase replication factor">+</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Scroll indicator appears at the bottom -->
-  <ScrollIndicator text="Scroll to explore" showAfterAnimation={false} />
+    <!-- Scroll indicator appears at the bottom -->
+    <ScrollIndicator text="Scroll to explore" showAfterAnimation={false} />
+  </div>
 </section>
 
 <!-- Load dotlottie-player for the overlay animation -->
@@ -93,7 +99,9 @@ import ScrollTrigger from "../shared/ScrollTrigger.astro";
   src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"
   type="module"></script>
 
-<script>
+<script type="module">
+  import { initHeroWidgetsAnimation } from "/src/scripts/heroWidgetsScroller.js"; // Added import here
+
   document.addEventListener('DOMContentLoaded', () => {
     console.log("Hero: Component initialized");
     
@@ -103,25 +111,21 @@ import ScrollTrigger from "../shared/ScrollTrigger.astro";
       return;
     }
     
-    // Force hero to be at least 100vh
     heroSection.style.height = '100vh';
     heroSection.style.minHeight = '100vh';
     console.log("Hero: Set height to 100vh");
     
-    // Ensure the hero section is visible
     heroSection.style.display = 'flex';
     heroSection.style.visibility = 'visible';
     heroSection.style.opacity = '1';
     
-    // Set up number controls for the database customizer
     setupNumberControls();
-    
-    // Set up cloud provider selection
     setupCloudSelection();
-
-    // Set up scroll reveal elements
     setupScrollReveal();
 
+    // Initialize the new Lottie scroll animation for widgets
+    initHeroWidgetsAnimation('hero-widgets-animation-target');
+    
     // Fade hero content based on scroll position
     const heroContent = document.querySelector('.hero-content');
 
@@ -241,17 +245,25 @@ import ScrollTrigger from "../shared/ScrollTrigger.astro";
 <style>
   .hero {
     position: relative;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
+    height: 200vh;
+    overflow: visible;
     background: linear-gradient(
       to bottom,
       var(--color-black),
       var(--color-secondary)
     );
+  }
+
+  .hero-pinned-content {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
   /* Full-size background */
@@ -274,13 +286,15 @@ import ScrollTrigger from "../shared/ScrollTrigger.astro";
     height: 100%;
     z-index: 1;
     pointer-events: none;
-    opacity: 1; /* Maintained full opacity */
-    display: flex; /* Restored for centering Lottie content if Lottie is smaller than container */
-    align-items: center; /* Restored */
-    justify-content: center; /* Restored */
+    opacity: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: scale(0.7);
+    transform-origin: center center;
   }
   
-  /* Make sure SVG is properly centered */
+  /* Make sure SVG is properly centered and scaled */
   .widgets-container :global(svg) {
     width: 100% !important;
     height: 100% !important;
@@ -296,13 +310,10 @@ import ScrollTrigger from "../shared/ScrollTrigger.astro";
     position: relative;
     width: 100%;
     max-width: 1200px;
-    margin: 0 auto;
     z-index: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    height: 100%;
     padding: 2rem;
   }
 
@@ -314,9 +325,9 @@ import ScrollTrigger from "../shared/ScrollTrigger.astro";
     text-align: center;
     color: var(--color-white);
     margin-bottom: 5rem;
-    position: relative; /* Added for z-index context if needed and for transform */
-    z-index: 2; /* Ensure it's above widgets-container (z-index: 1) but potentially below navbar */
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out; /* Added for fade-out animation */
+    position: relative;
+    z-index: 2;
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
   }
 
   .hero-content.fade-out-on-scroll {
