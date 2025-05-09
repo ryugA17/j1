@@ -1,0 +1,118 @@
+---
+interface Props {
+  name: string;
+  position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | string;
+  width?: string;
+  height?: string;
+  scale?: number;
+  offsetX?: string;
+  offsetY?: string;
+  opacity?: number;
+  zIndex?: number;
+}
+
+const {
+  name,
+  position,
+  width = "280px",
+  height = "auto",
+  scale = 1,
+  offsetX = "0px",
+  offsetY = "0px",
+  opacity = 1,
+  zIndex = 1
+} = Astro.props;
+
+// Calculate CSS position values based on the position string
+let positionStyles = {};
+if (position === 'top-left') {
+  positionStyles = { top: '15%', left: '5%' };
+} else if (position === 'top-right') {
+  positionStyles = { top: '15%', right: '5%' };
+} else if (position === 'bottom-left') {
+  positionStyles = { bottom: '15%', left: '5%' };
+} else if (position === 'bottom-right') {
+  positionStyles = { bottom: '15%', right: '5%' };
+} else if (position === 'center') {
+  positionStyles = { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
+} else if (position.includes(',')) {
+  // Custom position like "20%,30%" (x,y from top-left)
+  const [x, y] = position.split(',');
+  positionStyles = { left: x.trim(), top: y.trim() };
+}
+
+// Adjust transform if scale is not 1
+let transform = '';
+if (scale !== 1) {
+  if (positionStyles.transform) {
+    transform = `${positionStyles.transform} scale(${scale})`;
+  } else {
+    transform = `scale(${scale})`;
+  }
+  positionStyles.transform = transform;
+}
+
+// Apply offsets
+if (offsetX !== '0px' && !positionStyles.transform) {
+  positionStyles.transform = `translateX(${offsetX})`;
+} else if (offsetX !== '0px') {
+  positionStyles.transform += ` translateX(${offsetX})`;
+}
+
+if (offsetY !== '0px' && !positionStyles.transform) {
+  positionStyles.transform = `translateY(${offsetY})`;
+} else if (offsetY !== '0px') {
+  positionStyles.transform += ` translateY(${offsetY})`;
+}
+
+const styles = {
+  width,
+  height,
+  opacity,
+  zIndex,
+  ...positionStyles
+};
+
+// Create inline style string from styles object
+const styleString = Object.entries(styles)
+  .map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`)
+  .join('; ');
+---
+
+<div class={`widget ${name}`} style={styleString}>
+  <slot />
+</div>
+
+<style>
+  .widget {
+    position: absolute;
+    background-color: rgba(21, 45, 84, 0.7);
+    border-radius: 12px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    pointer-events: auto;
+    transition: all 0.3s ease;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 991px) {
+    .widget {
+      padding: 15px;
+    }
+  }
+  
+  @media (max-width: 767px) {
+    .widget {
+      position: relative;
+      width: 100% !important;
+      height: auto !important;
+      margin-bottom: 15px;
+      top: auto !important;
+      left: auto !important;
+      right: auto !important;
+      bottom: auto !important;
+      transform: none !important;
+    }
+  }
+</style> 

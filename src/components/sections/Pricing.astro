@@ -1,45 +1,141 @@
 ---
-import CloudNavbar from "../shared/CloudNavbar.astro";
 import Container from "../shared/Container.astro";
 import SectionName from "../shared/SectionName.astro";
 import SectionHeading from "../shared/SectionHeading.astro";
-import FoundationCard from "../sections-specific/strong-foundations/FoundationCard.astro";
+import PricingCard from "../sections-specific/pricing/PricingCard.astro";
+// import { Image } from 'astro:assets'; // No longer needed for productPage2 image
+// import productPage2 from '../../assets/Productpage2.png'; // No longer needed
+import HowPricingWorks from "../sections-specific/pricing/HowPricingWorks.astro";
+
+// Updated Pricing plan data
+const pricingPlans = [
+  {
+    title: "Cache",
+    sizeIndicator: "SMALL",
+    price: "$0 / hour",
+    description: "Suitable for a web-scale read/write application with modest total storage requirements.",
+    specifications: [
+      { label: "Category Title", value: "Replication-factor 2 cluster in one availability zones" },
+      { label: "Useable record storage", value: "400 GB" },
+      { label: "AWS Instances", value: "2x i5i.xsmall" },
+      { label: "GCP Instances", value: "2x n3-medium" }
+    ]
+  },
+  {
+    title: "Database",
+    sizeIndicator: "SMALL / MEDIUM",
+    price: "$0 / hour",
+    description: "Suitable for a high total storage application with six-figure reads/writes per second.",
+    specifications: [
+      { label: "Category Title", value: "Replication-factor 3 cluster in two availability zones" },
+      { label: "Useable record storage", value: "10 TB" },
+      { label: "AWS Instances", value: "12x i5i.xlarge" },
+      { label: "GCP Instances", value: "12x n3-large" }
+    ]
+  },
+  {
+    title: "Hybrid",
+    sizeIndicator: "MEDIUM",
+    price: "$0 / hour",
+    description: "Suitable for a web-scale read/write application with modest total storage requirements.", // Same as Cache, as per image
+    specifications: [
+      { label: "Category Title", value: "Replication-factor 3 cluster in three availability zones" },
+      { label: "Useable record storage", value: "20 TB" },
+      { label: "AWS Instances", value: "48x i5i.xlarge" },
+      { label: "GCP Instances", value: "48x n3-large" }
+    ]
+  }
+];
 ---
 
-<Container>
-  <section>
-    <div class="texts">
+<section class="transparent-pricing-section">
+  <Container>
+    <div class="heading-container">
       <SectionName>Pricing</SectionName>
-      <SectionHeading
-        >Transparent Pricing that doesn't tax your growth</SectionHeading
-      >
+      <SectionHeading>Transparent pricing that doesn't tax your growth</SectionHeading>
     </div>
-  </section>
-</Container>
+  </Container>
+</section>
+
+<HowPricingWorks />
+
+<section id="pricing" class="pricing-section">
+  <Container>
+    <div class="texts">
+      <SectionHeading>Pricing Examples</SectionHeading>
+      <p>Contact us for a detailing sizing and pricing estimate based on your workload</p>
+    </div>
+    
+    <div class="cards">
+      {pricingPlans.map((plan) => (
+        <PricingCard
+          title={plan.title}
+          sizeIndicator={plan.sizeIndicator}
+          price={plan.price}
+          description={plan.description}
+          specifications={plan.specifications}
+        />
+      ))}
+    </div>
+  </Container>
+</section>
+
 <style>
-  section {
-    padding: 60px 0 0 0;
+  .transparent-pricing-section {
+    background: transparent;
+    padding: 80px 0 0 0;
+    color: var(--color-black);
+  }
+
+  .heading-container {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+
+  .pricing-section {
+    padding: 120px 0 100px 0;
+    background-color: var(--color-background); /* Changed from #f9fafb to global background */
   }
 
   .texts {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
     text-align: center;
-    margin-top: 160px;
+    max-width: 600px;
+    margin: 0 auto 60px auto;
+  }
+
+  .pricing-description { /* This class seems unused, consider removing if not needed elsewhere */
+    color: #64748b;
+    font-size: 18px;
+    line-height: 1.6;
   }
 
   .cards {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 16px;
-    margin-top: 100px;
-    margin-left: auto;
-    margin-right: auto;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    /* margin-bottom: 80px; Removed as cards are the last element */
   }
+
+  /* Removed .product-showcase, .product-image, .product-overlay, .product-content, .contact-button styles as they are no longer used */
+
+  @media (max-width: 1024px) {
+    .cards {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+  }
+
   @media (max-width: 768px) {
+    .pricing-section {
+      padding: 80px 0 60px 0;
+    }
+    
     .cards {
       grid-template-columns: 1fr;
+      gap: 30px;
     }
   }
 </style>

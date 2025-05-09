@@ -1,0 +1,194 @@
+---
+interface Props {
+  className?: string;
+}
+
+const { className = "" } = Astro.props;
+
+// Generate a unique ID for this component instance
+const containerId = 'scroll-container-' + Math.random().toString(36).substring(2, 15);
+---
+
+<div id={containerId} class={`scroll-trigger-container ${className}`}>
+  <slot />
+</div>
+
+<script define:vars={{containerId}}>
+  document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById(containerId);
+    if (!container) {
+      console.error(`ScrollTriggerContainer: Container not found (${containerId})`);
+      return;
+    }
+
+    console.log(`ScrollTriggerContainer: Initialized container (${containerId})`);
+    
+    // Find all scroll trigger elements inside this container
+    const triggerElements = container.querySelectorAll('[data-scroll-trigger]');
+    console.log(`ScrollTriggerContainer: Found ${triggerElements.length} trigger elements`);
+    
+    // Initialize all trigger elements
+    triggerElements.forEach((element, index) => {
+      // Get the trigger point (percentage of scroll progress)
+      const triggerPoint = parseInt(element.getAttribute('data-trigger-at') || '20');
+      const triggerDelay = parseInt(element.getAttribute('data-trigger-delay') || '0');
+      const animationType = element.getAttribute('data-animation-type') || 'fade-in';
+      
+      // Add basic animation classes
+      element.classList.add(animationType);
+      element.style.opacity = '0';
+      
+      console.log(`ScrollTriggerContainer: Setup element ${index} to trigger at ${triggerPoint}%`);
+    });
+    
+    // Create an intersection observer for elements
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const element = entry.target;
+          const triggerDelay = parseInt(element.getAttribute('data-trigger-delay') || '0');
+          
+          setTimeout(() => {
+            element.classList.add('triggered');
+            element.classList.add('visible');
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0) translateX(0) scale(1)';
+          }, triggerDelay);
+          
+          // Stop observing once triggered
+          observer.unobserve(element);
+        }
+      });
+    }, {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1 // Trigger when at least 10% of the element is visible
+    });
+    
+    // Start observing all trigger elements
+    triggerElements.forEach(element => {
+      observer.observe(element);
+    });
+    
+    // Also handle scroll events for more dynamic control
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const viewportHeight = window.innerHeight;
+      const containerRect = container.getBoundingClientRect();
+      const containerHeight = containerRect.height;
+      const containerTop = containerRect.top + scrollY;
+      
+      // Calculate scroll progress through the container (0-100%)
+      const scrollProgress = Math.min(100, Math.max(0, 
+        ((scrollY - containerTop + viewportHeight) / (containerHeight + viewportHeight)) * 100
+      ));
+      
+      // Check all trigger elements
+      triggerElements.forEach((element, index) => {
+        const triggerPoint = parseInt(element.getAttribute('data-trigger-at') || '20');
+        const triggerDelay = parseInt(element.getAttribute('data-trigger-delay') || '0');
+        
+        const shouldTrigger = scrollProgress >= triggerPoint;
+        const isCurrentlyTriggered = element.classList.contains('triggered');
+        
+        if (shouldTrigger && !isCurrentlyTriggered) {
+          // Apply triggering with delay
+          setTimeout(() => {
+            element.classList.add('triggered');
+            element.classList.add('visible');
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0) translateX(0) scale(1)';
+            console.log(`ScrollTriggerContainer: Triggered element ${index} at ${scrollProgress}%`);
+          }, triggerDelay);
+        }
+      });
+    });
+    
+    // Listen for Lottie animation progress events (for backward compatibility)
+    window.addEventListener('lottie-hero-scroll-progress', (event) => {
+      const progress = event.detail.progress; // 0 to 100 percent
+      
+      // Check all trigger elements
+      triggerElements.forEach((element, index) => {
+        const triggerPoint = parseInt(element.getAttribute('data-trigger-at') || '20');
+        const triggerDelay = parseInt(element.getAttribute('data-trigger-delay') || '0');
+        const shouldTrigger = progress >= triggerPoint;
+        const isCurrentlyTriggered = element.classList.contains('triggered');
+        
+        if (shouldTrigger && !isCurrentlyTriggered) {
+          // Apply triggering with delay
+          setTimeout(() => {
+            element.classList.add('triggered');
+            element.classList.add('visible');
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0) translateX(0) scale(1)';
+            console.log(`ScrollTriggerContainer: Triggered element ${index} at ${progress}%`);
+          }, triggerDelay);
+        }
+      });
+    });
+    
+    // Force all elements to be visible when animation completes
+    document.addEventListener('hero-animation-complete', () => {
+      setTimeout(() => {
+        triggerElements.forEach((element, index) => {
+          const triggerDelay = parseInt(element.getAttribute('data-trigger-delay') || '0');
+          
+          setTimeout(() => {
+            element.classList.add('triggered');
+            element.classList.add('visible');
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0) translateX(0) scale(1)';
+          }, triggerDelay);
+        });
+        
+        console.log(`ScrollTriggerContainer: Triggered all elements after animation completed`);
+      }, 300);
+    });
+  });
+</script>
+
+<style>
+  .scroll-trigger-container {
+    position: relative;
+    width: 100%;
+  }
+  
+  /* Define animation base styles - will apply to any element with data-scroll-trigger */
+  :global([data-scroll-trigger]) {
+    transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: opacity, transform;
+  }
+  
+  /* Animation type classes */
+  :global([data-scroll-trigger].fade-in) {
+    opacity: 0;
+  }
+  
+  :global([data-scroll-trigger].slide-up) {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  
+  :global([data-scroll-trigger].slide-in-right) {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  
+  :global([data-scroll-trigger].scale-in) {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  
+  /* Applied when triggered */
+  :global([data-scroll-trigger].triggered) {
+    opacity: 1;
+    transform: translateY(0) translateX(0) scale(1);
+  }
+
+  /* Applied when visible (for compatibility with CSS selectors) */
+  :global([data-scroll-trigger].visible) {
+    opacity: 1;
+  }
+</style> 

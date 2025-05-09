@@ -1,0 +1,119 @@
+---
+interface Props {
+  src: string;
+  alt?: string;
+  className?: string;
+  revealAt?: number; // Percentage of scroll progress when image should appear
+  animationType?: 'fade-in' | 'slide-up' | 'slide-in-right' | 'scale-in'; // Animation type
+  delay?: number; // Delay in ms before animation starts
+}
+
+const { 
+  src, 
+  alt = "", 
+  className = "", 
+  revealAt = 20, 
+  animationType = "fade-in",
+  delay = 0
+} = Astro.props;
+
+// Generate a unique ID for this component instance
+const uniqueId = 'scroll-image-' + Math.random().toString(36).substring(2, 15);
+---
+
+<div 
+  id={uniqueId} 
+  class={`scroll-image ${animationType} ${className}`} 
+  data-reveal-at={revealAt}
+  data-delay={delay}
+  data-visible="false"
+>
+  <img src={src} alt={alt} />
+</div>
+
+<script define:vars={{uniqueId, revealAt, animationType, delay}}>
+  document.addEventListener('DOMContentLoaded', () => {
+    const imageElement = document.getElementById(uniqueId);
+    if (!imageElement) {
+      console.error(`ScrollImage: Image element not found (${uniqueId})`);
+      return;
+    }
+
+    console.log(`ScrollImage: Component initialized (${uniqueId}, reveal at ${revealAt}%)`);
+    
+    // Initially hide the image
+    imageElement.style.opacity = '0';
+    
+    // Handle visibility based on scroll progress
+    window.addEventListener('lottie-hero-scroll-progress', (event) => {
+      const progress = event.detail.progress; // 0 to 100 percent
+      const shouldReveal = progress >= revealAt;
+      
+      // Check if visibility state has changed
+      const isCurrentlyVisible = imageElement.getAttribute('data-visible') === 'true';
+      
+      if (shouldReveal && !isCurrentlyVisible) {
+        // Apply animation with delay
+        setTimeout(() => {
+          imageElement.classList.add('visible');
+          imageElement.setAttribute('data-visible', 'true');
+          console.log(`ScrollImage: Revealed image ${uniqueId} at ${progress}% (threshold: ${revealAt}%)`);
+        }, delay);
+      } else if (!shouldReveal && isCurrentlyVisible) {
+        // Hide the image
+        imageElement.classList.remove('visible');
+        imageElement.setAttribute('data-visible', 'false');
+        console.log(`ScrollImage: Hidden image ${uniqueId} at ${progress}% (threshold: ${revealAt}%)`);
+      }
+    });
+    
+    // Also handle the animation complete event to ensure visibility
+    document.addEventListener('lottie-hero-animation-complete', () => {
+      setTimeout(() => {
+        imageElement.classList.add('visible');
+        imageElement.setAttribute('data-visible', 'true');
+        console.log(`ScrollImage: Revealed image ${uniqueId} at animation complete`);
+      }, delay);
+    });
+  });
+</script>
+
+<style>
+  .scroll-image {
+    position: relative;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    will-change: opacity, transform;
+  }
+  
+  .scroll-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  /* Animation types */
+  .fade-in {
+    opacity: 0;
+  }
+  
+  .slide-up {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  
+  .slide-in-right {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  
+  .scale-in {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  
+  /* Visible state */
+  .scroll-image.visible {
+    opacity: 1;
+    transform: translateY(0) translateX(0) scale(1);
+  }
+</style> 

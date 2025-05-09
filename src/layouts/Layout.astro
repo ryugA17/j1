@@ -1,9 +1,25 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Aerospike",
+  description = "Experience the power of modern web animations"
+} = Astro.props;
+---
+
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Aerospike</title>
+    <title>{title}</title>
+    <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Import Lottie from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/lottie-web@5.9.6/build/player/lottie.min.js"></script>
   </head>
   <body>
     <slot />
@@ -69,6 +85,8 @@
     background-color: var(--color-background);
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: var(--color-foreground);
+    overscroll-behavior: none; /* Prevent bounce effect on mobile */
+    scroll-behavior: smooth; /* Enable smooth scrolling for browsers that support it */
   }
 
   /* ==========================================================================

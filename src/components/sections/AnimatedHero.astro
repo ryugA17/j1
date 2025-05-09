@@ -1,0 +1,219 @@
+---
+import ScrollTrigger from '../shared/ScrollTrigger.astro';
+import ScrollJack from '../shared/ScrollJack.astro';
+
+interface Props {
+  title?: string;
+  subtitle?: string;
+  animation?: "circles" | "widgets";
+  debug?: boolean;
+}
+
+const {
+  title = "Welcome to the Future",
+  subtitle = "Scroll down to explore",
+  animation = "circles", 
+  debug = false
+} = Astro.props;
+
+// Determine animation path based on the selected animation
+const animationPath = `/animations/${animation}.json`;
+---
+
+<section id="hero-section" class="animated-hero">
+  <ScrollJack targetSectionId="hero-section" />
+  
+  <div class="hero-content">
+    <div class="hero-text">
+      <h1 class="hero-title reveal-element">{title}</h1>
+      <p class="hero-subtitle reveal-element">{subtitle}</p>
+    </div>
+    
+    <div class="animation-container">
+      <ScrollTrigger 
+        animationPath={animationPath}
+        triggerElement="#hero-section"
+        scrub={true}
+        pin={true}
+        markers={debug}
+        debug={debug}
+        onEnter="hero-animation-started"
+        onLeave="hero-animation-completed"
+      />
+    </div>
+  </div>
+  
+  <div class="scroll-indicator">
+    <span class="indicator-text">Scroll to animate</span>
+    <div class="indicator-arrow">↓</div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Get the reveal elements
+    const revealElements = document.querySelectorAll('.reveal-element');
+    
+    // Add animation classes initially
+    setTimeout(() => {
+      revealElements.forEach((el, index) => {
+        setTimeout(() => {
+          el.classList.add('reveal-active');
+        }, index * 300); // Staggered reveal
+      });
+    }, 500);
+    
+    // Track animation progress
+    let animationComplete = false;
+    
+    // Listen for animation completion
+    document.addEventListener('hero-animation-completed', () => {
+      console.log('Hero animation completed');
+      animationComplete = true;
+      
+      // Show scroll indicator
+      const scrollIndicator = document.querySelector('.scroll-indicator');
+      if (scrollIndicator) {
+        scrollIndicator.classList.add('show-indicator');
+      }
+      
+      // Send a custom event to notify other components
+      const event = new CustomEvent('animation-complete', {
+        bubbles: true
+      });
+      
+      const heroSection = document.getElementById('hero-section');
+      if (heroSection) {
+        heroSection.dispatchEvent(event);
+      }
+    });
+    
+    // Add scroll event to handle scroll behavior
+    window.addEventListener('wheel', (e) => {
+      if (!animationComplete) {
+        // If animation is not complete, trigger a custom event for ScrollJack
+        const customEvent = new CustomEvent('scroll-jack-step', {
+          detail: { 
+            direction: e.deltaY > 0 ? 'down' : 'up', 
+            delta: Math.abs(e.deltaY) 
+          }
+        });
+        
+        const heroSection = document.getElementById('hero-section');
+        if (heroSection) {
+          heroSection.dispatchEvent(customEvent);
+        }
+      }
+    }, { passive: false });
+  });
+</script>
+
+<style>
+  .animated-hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: #0f0f1a;
+    color: white;
+  }
+  
+  .hero-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+  
+  .hero-text {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 2rem;
+    max-width: 800px;
+  }
+  
+  .hero-title {
+    font-size: 3.5rem;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.5rem;
+    line-height: 1.5;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    transition-delay: 0.2s;
+  }
+  
+  .reveal-element.reveal-active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .animation-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+  
+  .scroll-indicator {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  
+  .scroll-indicator.show-indicator {
+    opacity: 1;
+    animation: bounce 2s infinite;
+  }
+  
+  .indicator-text {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .indicator-arrow {
+    font-size: 1.5rem;
+  }
+  
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+  }
+  
+  @media (max-width: 768px) {
+    .hero-title {
+      font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+      font-size: 1.2rem;
+    }
+  }
+</style> 

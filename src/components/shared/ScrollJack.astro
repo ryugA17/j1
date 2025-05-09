@@ -1,0 +1,327 @@
+---
+interface Props {
+  targetSectionId: string;
+  duration?: number;
+  easing?: string;
+  onComplete?: () => void;
+}
+
+const { 
+  targetSectionId,
+  duration = 1000,
+  easing = 'cubic-bezier(0.645, 0.045, 0.355, 1.000)'
+} = Astro.props;
+---
+
+<div class="scroll-jack" data-target-section={targetSectionId} data-duration={duration} data-easing={easing}>
+  <!-- This is a controller component, no visible elements -->
+</div>
+
+<script define:vars={{ targetSectionId, duration, easing }}>
+document.addEventListener('DOMContentLoaded', () => {
+  // Core state management
+  const state = {
+    isScrollLocked: true,
+    isAnimating: false,
+    isAnimationComplete: false,
+    initialScrollY: 0,
+    allowScrolling: false,
+    completedSections: new Set(),
+    sectionAnimationProgress: 0,
+    targetSection: null,
+    nextSection: null
+  };
+  
+  // Get references to important elements
+  const targetSection = document.getElementById(targetSectionId);
+  if (!targetSection) {
+    console.error(`ScrollJack: Target section #${targetSectionId} not found`);
+    return;
+  }
+  
+  state.targetSection = targetSection;
+  state.initialScrollY = window.scrollY;
+  
+  console.log(`ScrollJack: Initialized for section #${targetSectionId}`);
+  
+  // Find the next section after our target
+  const findNextSection = () => {
+    const allSections = Array.from(document.querySelectorAll('section'));
+    const targetIndex = allSections.indexOf(targetSection);
+    
+    if (targetIndex !== -1 && targetIndex < allSections.length - 1) {
+      state.nextSection = allSections[targetIndex + 1];
+      console.log(`ScrollJack: Next section found: #${state.nextSection.id}`);
+    } else {
+      console.log('ScrollJack: This appears to be the last section');
+    }
+  };
+  
+  findNextSection();
+  
+  // Main event listeners
+  const setupEventListeners = () => {
+    // We need to intercept wheel, touch, and keyboard events
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('keydown', handleKeyDown, { passive: false });
+    
+    // Listen for the Lottie animation completion event
+    document.addEventListener('lottie-hero-animation-complete', handleAnimationComplete);
+    
+    // Allow scrolling once the entire hero animation is complete
+    targetSection.addEventListener('animation-complete', () => {
+      console.log('ScrollJack: Section animation complete event received');
+      state.allowScrolling = true;
+      state.isScrollLocked = false;
+      
+      // Only add this class once the animation is complete
+      targetSection.classList.add('animation-completed');
+      
+      // Show a scroll indicator
+      showScrollDownIndicator();
+      
+      // Remove constraints
+      document.body.style.overflow = '';
+      document.body.style.height = '';
+      
+      // Smooth scroll to the bottom of the section to create a seamless transition
+      smoothScrollTo(targetSection.offsetTop + targetSection.offsetHeight - window.innerHeight, 500);
+    });
+  };
+  
+  // Initial setup - lock scrolling
+  const initializeScrollJacking = () => {
+    document.body.style.overflow = 'hidden';
+    console.log('ScrollJack: Scroll locked initially');
+  };
+  
+  // Handle wheel events for desktop
+  function handleWheel(e) {
+    if (state.isScrollLocked && !state.allowScrolling) {
+      e.preventDefault();
+      
+      // If we're in the middle of the animation, don't trigger again
+      if (state.isAnimating) return;
+      
+      const deltaY = e.deltaY;
+      
+      // Forward the wheel event to the animation controller if we're in the target section
+      if (deltaY > 0) {
+        // Scrolling down in the target section
+        const customEvent = new CustomEvent('scroll-jack-step', {
+          detail: { direction: 'down', delta: Math.abs(deltaY) }
+        });
+        targetSection.dispatchEvent(customEvent);
+      } else if (deltaY < 0) {
+        // Scrolling up in the target section
+        const customEvent = new CustomEvent('scroll-jack-step', {
+          detail: { direction: 'up', delta: Math.abs(deltaY) }
+        });
+        targetSection.dispatchEvent(customEvent);
+      }
+    }
+  }
+  
+  // Handle touch events for mobile
+  let touchStartY = 0;
+  
+  function handleTouchStart(e) {
+    touchStartY = e.touches[0].clientY;
+  }
+  
+  function handleTouchMove(e) {
+    if (state.isScrollLocked && !state.allowScrolling) {
+      e.preventDefault();
+      
+      if (state.isAnimating) return;
+      
+      const touchY = e.touches[0].clientY;
+      const deltaY = touchStartY - touchY;
+      
+      if (Math.abs(deltaY) > 10) { // Small threshold to avoid tiny movements
+        if (deltaY > 0) {
+          // Swiping up (scrolling down)
+          const customEvent = new CustomEvent('scroll-jack-step', {
+            detail: { direction: 'down', delta: Math.abs(deltaY) }
+          });
+          targetSection.dispatchEvent(customEvent);
+        } else {
+          // Swiping down (scrolling up)
+          const customEvent = new CustomEvent('scroll-jack-step', {
+            detail: { direction: 'up', delta: Math.abs(deltaY) }
+          });
+          targetSection.dispatchEvent(customEvent);
+        }
+        
+        // Update touch reference
+        touchStartY = touchY;
+      }
+    }
+  }
+  
+  // Handle keyboard navigation
+  function handleKeyDown(e) {
+    if (state.isScrollLocked && !state.allowScrolling) {
+      const scrollKeys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space'];
+      
+      if (scrollKeys.includes(e.code)) {
+        e.preventDefault();
+        
+        if (state.isAnimating) return;
+        
+        if (['ArrowDown', 'PageDown', 'Space'].includes(e.code)) {
+          // Scrolling down
+          const delta = e.code === 'PageDown' ? 100 : 30;
+          const customEvent = new CustomEvent('scroll-jack-step', {
+            detail: { direction: 'down', delta }
+          });
+          targetSection.dispatchEvent(customEvent);
+        } else if (['ArrowUp', 'PageUp'].includes(e.code)) {
+          // Scrolling up
+          const delta = e.code === 'PageUp' ? 100 : 30;
+          const customEvent = new CustomEvent('scroll-jack-step', {
+            detail: { direction: 'up', delta }
+          });
+          targetSection.dispatchEvent(customEvent);
+        }
+      }
+    }
+  }
+  
+  // Handle the animation completion
+  function handleAnimationComplete(event) {
+    console.log('ScrollJack: Lottie animation complete event received');
+    
+    // Mark this section as complete
+    state.completedSections.add(targetSectionId);
+    state.isAnimationComplete = true;
+    
+    // Dispatch our own event to inform that this section's animation is complete
+    setTimeout(() => {
+      const completeEvent = new CustomEvent('animation-complete', {
+        bubbles: true
+      });
+      targetSection.dispatchEvent(completeEvent);
+    }, 300); // Short delay to ensure animation is fully rendered
+  }
+  
+  // Show a scroll indicator after animation completes
+  function showScrollDownIndicator() {
+    // Check if an indicator already exists
+    if (document.querySelector('.scroll-down-indicator')) return;
+    
+    const indicator = document.createElement('div');
+    indicator.className = 'scroll-down-indicator';
+    indicator.innerHTML = `
+      <div class="indicator-text">Scroll to continue</div>
+      <div class="indicator-arrow">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 5V19M12 19L19 12M12 19L5 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    `;
+    
+    // Add styles for the indicator
+    const style = document.createElement('style');
+    style.textContent = `
+      .scroll-down-indicator {
+        position: fixed;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: white;
+        z-index: 1000;
+        opacity: 0;
+        animation: fade-in 0.5s ease forwards, bounce 2s infinite 0.5s;
+      }
+      
+      @keyframes fade-in {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+      }
+      
+      @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+        40% { transform: translateX(-50%) translateY(-10px); }
+        60% { transform: translateX(-50%) translateY(-5px); }
+      }
+      
+      .indicator-text {
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+    `;
+    
+    document.head.appendChild(style);
+    document.body.appendChild(indicator);
+    
+    // Remove the indicator when user scrolls
+    const removeScrollIndicator = () => {
+      indicator.style.opacity = '0';
+      indicator.style.transition = 'opacity 0.5s ease';
+      setTimeout(() => {
+        if (indicator.parentNode) {
+          document.body.removeChild(indicator);
+        }
+      }, 500);
+      window.removeEventListener('scroll', removeScrollIndicator);
+    };
+    
+    window.addEventListener('scroll', removeScrollIndicator);
+  }
+  
+  // Smooth scroll to a position
+  function smoothScrollTo(targetY, duration) {
+    const startingY = window.scrollY;
+    const diff = targetY - startingY;
+    let start;
+    
+    // Don't animate if already at the target position
+    if (Math.abs(diff) < 10) return;
+    
+    window.requestAnimationFrame(function step(timestamp) {
+      if (!start) start = timestamp;
+      
+      const progress = timestamp - start;
+      const percent = Math.min(progress / duration, 1);
+      
+      // Use the easing function for natural movement
+      const easedPercent = easeInOutCubic(percent);
+      
+      window.scrollTo(0, startingY + diff * easedPercent);
+      
+      if (progress < duration) {
+        window.requestAnimationFrame(step);
+      }
+    });
+  }
+  
+  // Cubic easing for smooth scroll
+  function easeInOutCubic(t) {
+    return t < 0.5 
+      ? 4 * t * t * t 
+      : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+  }
+  
+  // Initialize everything
+  initializeScrollJacking();
+  setupEventListeners();
+  
+  // Export state for debugging
+  window.scrollJackState = state;
+});
+</script>
+
+<style>
+  .scroll-jack {
+    display: none;
+  }
+</style> 

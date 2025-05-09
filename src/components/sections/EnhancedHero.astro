@@ -1,0 +1,1277 @@
+---
+import Button from "../shared/Button.astro";
+import ScrollIndicator from "../shared/ScrollIndicator.astro";
+import ScrollTrigger from "../shared/ScrollTrigger.astro";
+---
+
+<script>
+  // Immediately show widgets when the page loads
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const widgetsContainer = document.getElementById('widgets-container');
+      const heroContent = document.getElementById('hero-text-content');
+      
+      if (widgetsContainer && heroContent) {
+        heroContent.classList.add('hidden');
+        widgetsContainer.classList.add('visible');
+        console.log('Widgets made visible on page load');
+      }
+    }, 500);
+  });
+</script>
+
+<section class="hero" id="hero-section">
+  <!-- Background animation with circles.json -->
+  <div class="hero-background" style="opacity: 1; z-index: 0;">
+    <ScrollTrigger 
+      animationPath="/animations/circles.json"
+      triggerElement="#hero-section"
+      scrub={false}
+      pin={false}
+      debug={false}
+      onEnter="hero-animation-started"
+      onLeave="hero-animation-complete"
+      renderer="svg"
+      containToViewport={true}
+      scale={1.5}
+      once={false}
+    />
+  </div>
+
+  <!-- Main content wrapper -->
+  <div class="content-wrapper">
+    <!-- Center hero content -->
+    <div class="hero-content" id="hero-text-content">
+      <h1 class="scroll-reveal" data-scroll-reveal-point="10">Engineered for speed, <br /> managed for you</h1>
+      <p class="scroll-reveal" data-scroll-reveal-point="20">Fully-managed real-time database for Amazon and Google clouds</p>
+      
+      <!-- Yellow CTA button -->
+      <div class="scroll-reveal button-container" data-scroll-reveal-point="30">
+        <Button>Join the preview</Button>
+      </div>
+      
+      <!-- Hidden debug button to toggle widgets -->
+      <button id="toggle-widgets" style="position: absolute; bottom: 5px; right: 5px; font-size: 10px; padding: 2px 5px; opacity: 0.2; background: #333; color: white; border: none; cursor: pointer;">
+        Toggle Widgets
+      </button>
+      
+      <!-- Emergency unlock button -->
+      <button id="unlock-scroll" style="position: absolute; bottom: 5px; right: 90px; font-size: 10px; padding: 2px 5px; opacity: 0.2; background: #833; color: white; border: none; cursor: pointer;">
+        Unlock Scroll
+      </button>
+    </div>
+  </div>
+
+  <!-- Widget components animation overlay -->
+  <div class="widgets-container visible" id="widgets-container">
+    <div class="animation-wrapper">
+      <ScrollTrigger 
+        animationPath="/animations/widgets.json"
+        triggerElement="#hero-section"
+        scrub={false}
+        pin={false}
+        scale={1.0}
+        containToViewport={true}
+        startFrame={0}
+        endFrame={100}
+        renderer="svg"
+        debug={false}
+        once={false}
+        onEnter="widgets-animation-started"
+        onLeave="widgets-animation-complete"
+        frameByFrame={true}
+        autoplay={false}
+        id="widgets-animation"
+      />
+    </div>
+    
+    <!-- Inline script to ensure animation plays -->
+    <script>
+      // Simple function to control animation manually
+      document.addEventListener('DOMContentLoaded', () => {
+        let currentFrame = 0;
+        const totalFrames = 100;
+        let animationInterval;
+        let attempts = 0;
+        const maxAttempts = 20;
+        
+        function startManualAnimation() {
+          // Try different selectors to find the animation
+          let animElement = document.querySelector('#widgets-animation');
+          if (!animElement || !animElement.animation) {
+            animElement = document.querySelector('.scroll-trigger-animation');
+          }
+          if (!animElement || !animElement.animation) {
+            animElement = document.querySelector('.widgets-container svg');
+          }
+          
+          if (!animElement || !animElement.animation) {
+            attempts++;
+            if (attempts < maxAttempts) {
+              console.log(`Animation not ready, attempt ${attempts}/${maxAttempts}`);
+              setTimeout(startManualAnimation, 500);
+              return;
+            } else {
+              console.warn('Failed to find animation after maximum attempts');
+              return;
+            }
+          }
+          
+          console.log('Found animation element, starting manual control');
+          
+          // Clear any existing interval
+          if (animationInterval) clearInterval(animationInterval);
+          
+          // Force widgets container to be visible
+          const container = document.getElementById('widgets-container');
+          if (container) {
+            container.style.opacity = '1';
+            container.style.visibility = 'visible';
+            container.classList.add('visible');
+          }
+          
+          // Hide hero content
+          const heroContent = document.getElementById('hero-text-content');
+          if (heroContent) {
+            heroContent.classList.add('hidden');
+          }
+          
+          // Set up interval to advance frames
+          animationInterval = setInterval(() => {
+            if (currentFrame < totalFrames) {
+              currentFrame++;
+              try {
+                animElement.animation.goToAndStop(currentFrame, true);
+                
+                // Update progress bar if it exists
+                const progressFill = document.getElementById('animation-progress-fill');
+                if (progressFill) {
+                  progressFill.style.width = `${(currentFrame / totalFrames) * 100}%`;
+                }
+                
+                // Show continue button near the end
+                if (currentFrame > totalFrames * 0.9) {
+                  const continueButton = document.getElementById('continue-button');
+                  if (continueButton) continueButton.classList.add('visible');
+                }
+              } catch (e) {
+                console.error('Error advancing animation frame:', e);
+              }
+            } else {
+              clearInterval(animationInterval);
+            }
+          }, 100); // Advance frame every 100ms
+        }
+        
+        // Start the animation after a short delay
+        setTimeout(startManualAnimation, 1000);
+      });
+    </script>
+    
+    <!-- Debug info -->
+    <div class="debug-info" style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); color: white; padding: 5px; font-size: 10px; z-index: 1000;">
+      Widgets Container Active
+    </div>
+    
+    <!-- Animation progress indicator -->
+    <div class="animation-progress">
+      <div class="progress-bar">
+        <div class="progress-fill" id="animation-progress-fill"></div>
+      </div>
+      <button id="continue-button" class="continue-button">
+        Continue Exploring
+      </button>
+    </div>
+  </div>
+
+  <!-- Scroll indicator appears at the bottom -->
+  <ScrollIndicator text="SCROLL TO EXPLORE" showAfterAnimation={true} />
+
+  <!-- Add scroll indicator that appears when animation completes -->
+  <div class="scroll-indicator hidden" id="scroll-indicator">
+    <div class="scroll-text">Scroll Down</div>
+    <div class="scroll-arrow">↓</div>
+  </div>
+</section>
+
+<script>
+// Keep the JavaScript functionality
+document.addEventListener('DOMContentLoaded', () => {
+  console.log("Hero: Component initialized");
+  
+  const heroSection = document.getElementById('hero-section');
+  const heroContent = document.getElementById('hero-text-content');
+  const widgetsContainer = document.getElementById('widgets-container');
+  
+  if (!heroSection || !heroContent || !widgetsContainer) {
+    console.error("Hero: Required elements not found");
+    return;
+  }
+  
+  // Immediately show widgets and hide content
+  heroContent.classList.add('hidden');
+  widgetsContainer.classList.add('visible');
+  console.log('Forcing widgets to be visible on page load');
+  
+  // Check if we should use scroll lock or not
+  const useScrollLock = true; // Set to true to enable scroll lock
+  
+  // Add a timeout to automatically unlock scroll after 8 seconds in case animation doesn't complete
+  if (useScrollLock) {
+    setTimeout(() => {
+      if (document.body.classList.contains('scroll-locked')) {
+        document.body.classList.remove('scroll-locked');
+        heroSection.classList.remove('locked');
+        console.log('Auto-unlocking scroll after timeout');
+      }
+    }, 8000);
+  }
+  
+  if (useScrollLock) {
+    // Apply scroll lock to body
+    document.body.classList.add('scroll-locked');
+    heroSection.classList.add('locked');
+    
+    // Trigger widget animation after a short delay
+    setTimeout(triggerWidgetAnimation, 1000);
+    
+    // Immediately show widgets when scroll lock is active
+    setTimeout(() => {
+      heroContent.classList.add('hidden');
+      widgetsContainer.classList.add('visible');
+      console.log('Showing widgets immediately in scroll lock mode');
+    }, 500);
+  } else {
+    // Remove locked class if it exists
+    document.body.classList.remove('scroll-locked');
+    heroSection.classList.remove('locked');
+  }
+  
+  // Function to prevent scroll events
+  function preventScroll(e) {
+    if (heroSection.classList.contains('locked')) {
+      // Don't prevent default for events coming from the widgets container
+      if (e.target.closest('.widgets-container')) {
+        return true;
+      }
+      e.preventDefault();
+      return false;
+    }
+  }
+  
+  // Function to prevent scrolling with keyboard
+  function preventKeyScroll(e) {
+    // Prevent scrolling with keys like space, arrows, page up/down
+    if ([32, 33, 34, 35, 36, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+      if (heroSection.classList.contains('locked')) {
+        e.preventDefault();
+        return false;
+      }
+    }
+  }
+  
+  if (useScrollLock) {
+    // Add event listeners to prevent scrolling
+    window.addEventListener('wheel', preventScroll, { passive: false });
+    window.addEventListener('touchmove', preventScroll, { passive: false });
+    
+    // Also prevent scrolling with keyboard
+    window.addEventListener('keydown', preventKeyScroll, { passive: false });
+  }
+  
+  // Force hero to be at least 100vh
+  heroSection.style.minHeight = '100vh';
+  
+  // Ensure the hero section is visible
+  heroSection.style.opacity = '1';
+  
+  // Enhance the background animation
+  enhanceBackgroundAnimation();
+  
+  // Set up scroll reveal elements
+  setupScrollReveal();
+  
+  // Enhance the widgets animation positioning
+  enhanceWidgetsAnimation();
+  
+  // Set up the transition between text and widgets based on scroll
+  setupTextToWidgetsTransition();
+  
+  // Set up scroll unlock when animation completes
+  if (useScrollLock) {
+    setupScrollUnlock();
+  }
+  
+  // Add emergency unlock button functionality
+  const unlockButton = document.getElementById('unlock-scroll');
+  if (unlockButton) {
+    unlockButton.addEventListener('click', () => {
+      document.body.classList.remove('scroll-locked');
+      if (heroSection) heroSection.classList.remove('locked');
+      console.log('Scroll manually unlocked');
+    });
+  }
+  
+  // Set up scroll reveal elements
+  function setupScrollReveal() {
+    const revealElements = document.querySelectorAll('.scroll-reveal');
+    
+    // Create an intersection observer to watch for elements scrolling into view
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const element = entry.target;
+          element.classList.add('revealed');
+          // Optionally stop observing this element after it's been revealed
+          observer.unobserve(element);
+        }
+      });
+    }, {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1 // Trigger when at least 10% of the element is visible
+    });
+    
+    // Start observing all reveal elements
+    revealElements.forEach(element => {
+      observer.observe(element);
+    });
+    
+    // Also handle scroll events to track scroll position for finer control
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const viewportHeight = window.innerHeight;
+      
+      revealElements.forEach(element => {
+        const revealPoint = parseInt(element.dataset.scrollRevealPoint || "0");
+        const triggerPosition = viewportHeight * (revealPoint / 100);
+        
+        if (scrollY > triggerPosition) {
+          element.classList.add('revealed');
+        }
+      });
+    });
+  }
+  
+  // Enhance the widgets animation positioning
+  function enhanceWidgetsAnimation() {
+    // Make sure we have the container
+    if (!widgetsContainer) return;
+    
+    // Set up progress tracking
+    const progressFill = document.getElementById('animation-progress-fill');
+    const continueButton = document.getElementById('continue-button');
+    
+    // If scroll is locked, immediately show widgets
+    if (useScrollLock && heroSection.classList.contains('locked')) {
+      setTimeout(() => {
+        heroContent.classList.add('hidden');
+        widgetsContainer.classList.add('visible');
+        console.log('Forced widget visibility in scroll lock mode');
+      }, 500);
+    }
+    
+    // Direct interaction with hero section to detect movement
+    heroSection.addEventListener('mousemove', () => {
+      // Show widgets when mouse moves in hero section
+      setTimeout(() => {
+        heroContent.classList.add('hidden');
+        widgetsContainer.classList.add('visible');
+      }, 500);
+    }, { once: true });
+    
+    // Listen for animation loaded event
+    document.addEventListener('animation-loaded', (event) => {
+      if (event.detail.element.closest('.widgets-container')) {
+        console.log('Widgets animation loaded', event.detail);
+      }
+    });
+  }
+  
+  // Set up the transition between text and widgets based on scroll
+  function setupTextToWidgetsTransition() {
+    // Add toggle button functionality
+    const toggleButton = document.getElementById('toggle-widgets');
+    if (toggleButton) {
+      toggleButton.addEventListener('click', () => {
+        heroContent.classList.toggle('hidden');
+        widgetsContainer.classList.toggle('visible');
+        console.log('Widgets toggled manually');
+      });
+    }
+    
+    // Add scroll event listener
+    window.addEventListener('scroll', () => {
+      // Show widgets when scrolled
+      if (window.scrollY > 10) {
+        heroContent.classList.add('hidden');
+        widgetsContainer.classList.add('visible');
+      } else {
+        heroContent.classList.remove('hidden');
+        widgetsContainer.classList.remove('visible');
+      }
+    });
+    
+    // Initial check
+    const initialScrolled = window.scrollY > 10;
+    if (initialScrolled) {
+      heroContent.classList.add('hidden');
+      widgetsContainer.classList.add('visible');
+    }
+    
+    // Also trigger on mousewheel for faster detection
+    document.addEventListener('wheel', () => {
+      heroContent.classList.add('hidden');
+      widgetsContainer.classList.add('visible');
+    }, { once: true });
+  }
+  
+  // Set up scroll unlock when animation completes
+  function setupScrollUnlock() {
+    const continueButton = document.getElementById('continue-button');
+    if (!continueButton) return;
+    
+    // When continue button is clicked, unlock scrolling
+    continueButton.addEventListener('click', () => {
+      // Remove scroll lock from body
+      document.body.classList.remove('scroll-locked');
+      
+      // Remove locked class from hero section
+      heroSection.classList.remove('locked');
+      
+      // Remove event listeners
+      window.removeEventListener('wheel', preventScroll, { passive: false });
+      window.removeEventListener('touchmove', preventScroll, { passive: false });
+      window.removeEventListener('keydown', preventKeyScroll, { passive: false });
+      
+      // Make continue button more visible
+      continueButton.style.opacity = '1';
+      continueButton.style.transform = 'scale(1.1)';
+      
+      // Scroll to the next section
+      const nextSection = heroSection.nextElementSibling;
+      if (nextSection) {
+        nextSection.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        // If no next section, just allow scrolling down
+        window.scrollTo({
+          top: window.innerHeight,
+          behavior: 'smooth'
+        });
+      }
+      
+      // Log for debugging
+      console.log('Scroll unlocked, continuing to next section');
+    });
+    
+    // If animation doesn't complete within 15 seconds, show continue button anyway
+    setTimeout(() => {
+      if (!continueButton.classList.contains('visible')) {
+        continueButton.classList.add('visible');
+        
+        // Update progress bar to full
+        const progressFill = document.getElementById('animation-progress-fill');
+        if (progressFill) {
+          progressFill.style.width = '100%';
+        }
+      }
+    }, 15000);
+  }
+  
+  // Function to manually trigger widget animation in scroll lock mode
+  function triggerWidgetAnimation() {
+    if (useScrollLock && heroSection.classList.contains('locked')) {
+      // Show widgets container
+      heroContent.classList.add('hidden');
+      widgetsContainer.classList.add('visible');
+      
+      // Find the animation element
+      const animationElement = widgetsContainer.querySelector('.scroll-trigger-animation');
+      if (animationElement && animationElement.animation) {
+        // Play the animation
+        animationElement.animation.play();
+        console.log('Manually triggered widget animation');
+      }
+    }
+  }
+  
+  // Listen for animation progress to track completion
+  document.addEventListener('frame-changed', (e) => {
+    const { progress, totalFrames, currentFrame } = e.detail;
+    
+    // If we're near the end of the animation (90% complete)
+    if (progress >= 0.9 || currentFrame >= totalFrames * 0.9) {
+      // Trigger the animation complete event if it hasn't been triggered yet
+      if (document.body.classList.contains('scroll-locked')) {
+        console.log('Animation nearly complete, unlocking scroll');
+        document.body.classList.remove('scroll-locked');
+        heroSection.classList.remove('locked');
+        
+        // Show scroll indicator
+        const scrollIndicator = document.getElementById('scroll-indicator');
+        if (scrollIndicator) {
+          scrollIndicator.classList.remove('hidden');
+          scrollIndicator.classList.add('visible');
+        }
+        
+        // Show continue button
+        const continueButton = document.querySelector('.continue-button');
+        if (continueButton) {
+          continueButton.classList.add('visible');
+        }
+      }
+    }
+  });
+  
+  // Enhance the background animation
+  function enhanceBackgroundAnimation() {
+    const heroBackground = document.querySelector('.hero-background');
+    if (!heroBackground) return;
+    
+    // Directly trigger animation start
+    const event = new CustomEvent('hero-animation-started', {
+      detail: { element: heroBackground }
+    });
+    document.dispatchEvent(event);
+    
+    // Check for the SVG element created by Lottie
+    const checkForBackgroundSvg = setInterval(() => {
+      const svg = heroBackground.querySelector('svg');
+      if (svg) {
+        clearInterval(checkForBackgroundSvg);
+        
+        // Make SVG fully visible
+        svg.style.display = 'block';
+        svg.style.visibility = 'visible';
+        svg.style.opacity = '1';
+        svg.style.width = '100%';
+        svg.style.height = '100%';
+        svg.style.position = 'absolute';
+        svg.style.top = '0';
+        svg.style.left = '0';
+        
+        // Make all paths visible
+        const paths = svg.querySelectorAll('path, rect, circle, ellipse, polyline, polygon, g');
+        paths.forEach(path => {
+          path.style.visibility = 'visible';
+          path.style.opacity = '1';
+        });
+        
+        // Find the animation object and play it
+        const animation = heroBackground.querySelector('.lottie-container')?.animation;
+        if (animation) {
+          animation.play();
+          console.log('Background animation started playing');
+        }
+        
+        console.log('Background animation enhanced');
+      }
+    }, 100);
+    
+    // Stop checking after 5 seconds to prevent infinite loop
+    setTimeout(() => {
+      clearInterval(checkForBackgroundSvg);
+    }, 5000);
+  }
+  
+  // Simulate scroll to trigger animations immediately for above-fold content
+  setTimeout(() => {
+    window.dispatchEvent(new Event('scroll'));
+    
+    // Force widget visibility after page load
+    setTimeout(() => {
+      if (widgetsContainer && !widgetsContainer.classList.contains('visible')) {
+        heroContent.classList.add('hidden');
+        widgetsContainer.classList.add('visible');
+        
+        // Log for debugging
+        console.log('Forced widget visibility after timeout');
+      }
+    }, 3000);
+  }, 100);
+});
+</script>
+
+<style>
+  /* Scroll lock styles */
+  :global(body.scroll-locked) {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+    top: 0 !important;
+    left: 0 !important;
+  }
+  
+  .hero.locked {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100vh !important;
+    z-index: 1000 !important;
+    overflow: hidden !important;
+  }
+  
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background-color: #030303; /* Darker background */
+    color: var(--color-white);
+  }
+
+  /* Full-size background */
+  .hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    opacity: 0.6; /* Increase opacity for better visibility */
+  }
+  
+  /* Make sure background SVG is visible */
+  .hero-background :global(svg) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  /* Ensure all SVG elements in background are visible */
+  .hero-background :global(svg path),
+  .hero-background :global(svg rect),
+  .hero-background :global(svg circle),
+  .hero-background :global(svg ellipse),
+  .hero-background :global(svg polyline),
+  .hero-background :global(svg polygon),
+  .hero-background :global(svg g) {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  /* Make sure animation container is visible */
+  .hero-background :global(.scroll-trigger-animation),
+  .hero-background :global(.lottie-container) {
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: block !important;
+  }
+
+  /* Widgets container and animation */
+  .widgets-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1; /* Start visible by default */
+    visibility: visible !important;
+  }
+  
+  /* When widgets are visible */
+  .widgets-container.visible {
+    opacity: 1;
+    z-index: 10;
+    visibility: visible !important;
+  }
+  
+  /* Ensure widgets are visible in scroll lock mode */
+  .hero.locked .widgets-container {
+    opacity: 1;
+    z-index: 10;
+    visibility: visible !important;
+  }
+  
+  /* Make sure SVG is fully visible */
+  .widgets-container :global(svg) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 100%;
+    max-height: 100%;
+    width: 100% !important;
+    height: 100% !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: block !important;
+    z-index: 20 !important;
+  }
+
+  /* Ensure all paths in SVG are visible */
+  .widgets-container :global(svg path),
+  .widgets-container :global(svg rect),
+  .widgets-container :global(svg circle),
+  .widgets-container :global(svg ellipse),
+  .widgets-container :global(svg polyline),
+  .widgets-container :global(svg polygon),
+  .widgets-container :global(svg g) {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Content layout wrapper */
+  .content-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 2rem;
+  }
+
+  /* Hero content - centered and larger */
+  .hero-content {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    color: var(--color-white);
+    margin-bottom: 2rem;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+    will-change: opacity;
+  }
+  
+  /* When content should be hidden */
+  .hero-content.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .hero-content h1 {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero p {
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
+    color: var(--color-subtle-text);
+    max-width: 600px;
+    margin: 0 auto 2rem;
+  }
+
+  /* Component layout container */
+  .ui-components {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    padding: 6rem 4rem;
+    max-width: 1400px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* Card styling - common for all cards */
+  .monitor-card, .cloud-selector-card, .team-invite-card, .database-customizer-card {
+    position: absolute;
+    background-color: rgba(21, 45, 84, 0.7);
+    border-radius: 12px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    max-width: 280px;
+    width: 100%;
+    pointer-events: auto;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  /* Card positions */
+  .monitor-card {
+    top: 15%;
+    left: 5%;
+  }
+
+  .cloud-selector-card {
+    bottom: 15%;
+    left: 5%;
+  }
+
+  .team-invite-card {
+    top: 15%;
+    right: 5%;
+  }
+
+  .database-customizer-card {
+    bottom: 15%;
+    right: 5%;
+  }
+
+  /* Card titles */
+  .monitor-card h3, .cloud-selector-card h3, .team-invite-card h3, .database-customizer-card h3 {
+    color: var(--color-white);
+    font-size: 16px;
+    margin-bottom: 16px;
+    text-transform: none;
+    font-weight: 500;
+  }
+
+  /* Card states */
+  [data-scroll-trigger].visible,
+  [data-scroll-trigger][data-animation-type="fade-in"].visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Metrics gauge styling */
+  .metrics-row {
+    display: flex;
+    gap: 15px;
+  }
+
+  .metric-gauge {
+    flex: 1;
+  }
+
+  .gauge-label {
+    color: #e0e0e0;
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+
+  .gauge-wrap {
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 5px;
+  }
+
+  .gauge {
+    height: 100%;
+    width: var(--percentage);
+    background-color: #EBFF33;
+    border-radius: 4px;
+  }
+
+  .gauge-value {
+    color: #e0e0e0;
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  /* Cloud provider selection styling */
+  .cloud-options {
+    display: flex;
+    gap: 10px;
+  }
+
+  .cloud-option {
+    flex: 1;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .cloud-option:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .cloud-option.selected {
+    border-color: #EBFF33;
+    background-color: rgba(235, 255, 51, 0.1);
+  }
+
+  .cloud-logo {
+    height: 25px;
+    width: auto;
+    color: white;
+  }
+
+  /* Team invite styling */
+  .teammate-avatars {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: transform 0.2s ease;
+  }
+
+  .avatar:hover {
+    transform: scale(1.1);
+  }
+
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .add-avatar {
+    background-color: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .add-avatar svg {
+    width: 18px;
+    height: 18px;
+    color: white;
+  }
+
+  /* Database customizer styling */
+  .setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    color: #e0e0e0;
+    font-size: 14px;
+  }
+
+  .divider {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin: 12px 0;
+  }
+
+  .number-control {
+    display: flex;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .number-control button {
+    background: transparent;
+    border: none;
+    color: var(--color-white);
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .number-control button svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .number-control button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .number-control .value {
+    padding: 0 12px;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  /* Button styling */
+  .button-container {
+    margin-top: 2rem;
+    z-index: 3;
+  }
+
+  /* Scroll reveal animations */
+  .scroll-reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .scroll-reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Responsive styling */
+  @media (max-width: 1200px) {
+    .ui-components {
+      padding: 4rem 2rem;
+    }
+    
+    .monitor-card, .cloud-selector-card, .team-invite-card, .database-customizer-card {
+      max-width: 240px;
+    }
+  }
+
+  @media (max-width: 990px) {
+    .ui-components {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      padding: 0;
+    }
+    
+    .monitor-card, .cloud-selector-card, .team-invite-card, .database-customizer-card {
+      position: relative;
+      top: auto;
+      left: auto;
+      right: auto;
+      bottom: auto;
+      max-width: 100%;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .ui-components {
+      grid-template-columns: 1fr;
+    }
+    
+    .hero-content h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+    }
+    
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+    }
+  }
+
+  @media (max-width: 991px) {
+    .widgets-container {
+      opacity: 0.6;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .widgets-container {
+      opacity: 0.4;
+    }
+
+    .hero-content h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+    }
+    
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+    }
+  }
+
+  /* Responsive styling for widgets */
+  @media (max-width: 1400px) {
+    .widgets-container :global(svg) {
+      max-width: 95%;
+    }
+  }
+
+  /* Widgets container and animation styling */
+  .widgets-container.widgets-ready :global(svg) {
+    filter: none;
+  }
+  
+  /* Subtle animation when widgets become visible */
+  .widgets-container.visible :global(svg) {
+    animation: none;
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translate(-50%, -50%);
+    }
+  }
+
+  @media (max-width: 991px) {
+    .widgets-container {
+      opacity: 0.6;
+    }
+    
+    .widgets-container.visible {
+      opacity: 0.9;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .widgets-container {
+      opacity: 0.4;
+    }
+    
+    .widgets-container.visible {
+      opacity: 0.8;
+    }
+    
+    @keyframes float {
+      0% {
+        transform: translate(-50%, -50%) scale(0.7);
+      }
+      50% {
+        transform: translate(-50%, -52%) scale(0.7);
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(0.7);
+      }
+    }
+  }
+
+  /* Animation wrapper styles */
+  .animation-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+    z-index: 15;
+  }
+  
+  .animation-wrapper :global(.scroll-trigger-animation),
+  .animation-wrapper :global(.lottie-container) {
+    width: 100% !important;
+    height: 100% !important;
+    position: relative;
+    overflow: visible;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Animation progress indicator */
+  .animation-progress {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 20;
+    width: 200px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  
+  .widgets-container.visible .animation-progress {
+    opacity: 1;
+  }
+  
+  .progress-bar {
+    width: 100%;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 15px;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background-color: #EBFF33;
+    transition: width 0.2s ease;
+  }
+
+  /* Continue button styles */
+  .continue-button {
+    background-color: #EBFF33;
+    color: #000;
+    border: none;
+    border-radius: 50px;
+    padding: 12px 24px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s ease, transform 0.5s ease, background-color 0.3s ease;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  .continue-button.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .continue-button:hover {
+    background-color: #dbef23;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Scroll indicator styles */
+  .scroll-indicator {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  
+  .scroll-indicator.visible {
+    opacity: 1;
+  }
+  
+  .scroll-indicator.hidden {
+    opacity: 0;
+  }
+  
+  .scroll-text {
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+  
+  .scroll-arrow {
+    font-size: 24px;
+    animation: bounce 1s infinite alternate;
+  }
+  
+  @keyframes bounce {
+    from {
+      transform: translateY(0px);
+    }
+    to {
+      transform: translateY(10px);
+    }
+  }
+</style> 

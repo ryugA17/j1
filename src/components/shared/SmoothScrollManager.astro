@@ -1,0 +1,156 @@
+---
+interface Props {
+  enableAfterHeroComplete?: boolean;
+  friction?: number;
+}
+
+const { 
+  enableAfterHeroComplete = true,
+  friction = 0.08
+} = Astro.props;
+---
+
+<div class="smooth-scroll-manager" data-enable-after-hero={enableAfterHeroComplete.toString()} data-friction={friction}></div>
+
+<script define:vars={{ enableAfterHeroComplete, friction }}>
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('SmoothScrollManager: Initializing');
+
+  // Smooth scroll state
+  const state = {
+    isEnabled: !enableAfterHeroComplete, // Only enable after hero if configured
+    targetY: 0,
+    currentY: 0,
+    isScrolling: false,
+    rafId: null
+  };
+
+  // Get all sections for navigation
+  const sections = Array.from(document.querySelectorAll('section'));
+  
+  // If we need to wait for hero animation
+  if (enableAfterHeroComplete) {
+    console.log('SmoothScrollManager: Waiting for hero animation to complete');
+    
+    const heroSection = document.getElementById('hero-section');
+    if (heroSection) {
+      heroSection.addEventListener('animation-complete', () => {
+        console.log('SmoothScrollManager: Hero animation completed, enabling smooth scroll');
+        state.isEnabled = true;
+        
+        // Start at the current position
+        state.targetY = window.scrollY;
+        state.currentY = window.scrollY;
+        
+        // Start the animation loop
+        if (!state.isScrolling) {
+          state.isScrolling = true;
+          state.rafId = requestAnimationFrame(updateScroll);
+        }
+      });
+    } else {
+      console.warn('SmoothScrollManager: Hero section not found, enabling smooth scroll immediately');
+      state.isEnabled = true;
+    }
+  }
+
+  // Set up scroll event listener
+  window.addEventListener('scroll', () => {
+    if (!state.isEnabled) return;
+    
+    // Update target scroll position
+    state.targetY = window.scrollY;
+    
+    // Start the animation loop if not already running
+    if (!state.isScrolling) {
+      state.isScrolling = true;
+      state.rafId = requestAnimationFrame(updateScroll);
+    }
+  });
+
+  // Render function for smooth scrolling
+  function updateScroll() {
+    // Calculate the distance between current and target positions
+    const diff = state.targetY - state.currentY;
+    
+    // If we're close enough to the target, stop animating
+    if (Math.abs(diff) < 0.1) {
+      state.currentY = state.targetY;
+      state.isScrolling = false;
+      return;
+    }
+    
+    // Apply easing using the friction setting
+    state.currentY += diff * friction;
+    
+    // Apply the transform to create the smooth scroll effect
+    applyScrollTransform(state.currentY);
+    
+    // Continue animation
+    state.rafId = requestAnimationFrame(updateScroll);
+  }
+
+  // Apply transform to create smooth scrolling effect
+  function applyScrollTransform(y) {
+    // We're using translateY for better performance than manipulating scrollTop
+    const content = document.documentElement;
+    
+    // Using negative value because we're moving the content up as we scroll down
+    content.style.transform = `translateY(${-y}px)`;
+  }
+
+  // Set up resize handler to ensure everything stays aligned
+  window.addEventListener('resize', () => {
+    if (!state.isEnabled) return;
+    
+    // Reset position on resize to avoid layout issues
+    state.targetY = window.scrollY;
+    state.currentY = window.scrollY;
+    applyScrollTransform(state.currentY);
+  });
+
+  // Initial setup
+  if (state.isEnabled) {
+    // Start at the current position
+    state.targetY = window.scrollY;
+    state.currentY = window.scrollY;
+    
+    // Start the animation loop
+    if (!state.isScrolling) {
+      state.isScrolling = true;
+      state.rafId = requestAnimationFrame(updateScroll);
+    }
+    
+    // Apply initial styles
+    document.documentElement.style.height = '100%';
+    document.body.style.height = '100%';
+    
+    console.log('SmoothScrollManager: Smooth scrolling enabled');
+  }
+
+  // For debugging
+  window.smoothScrollState = state;
+});
+</script>
+
+<style>
+  .smooth-scroll-manager {
+    display: none;
+  }
+  
+  :global(html.smooth-scrolling) {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+  }
+  
+  :global(html.smooth-scrolling body) {
+    overflow: visible;
+    position: absolute;
+    width: 100%;
+    min-height: 100%;
+  }
+</style> 

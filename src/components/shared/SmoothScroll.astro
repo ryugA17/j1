@@ -1,0 +1,308 @@
+---
+interface Props {
+  enabled?: boolean;
+  speed?: number;
+}
+
+const { 
+  enabled = true,
+  speed = 0.1
+} = Astro.props;
+---
+
+<div class="smooth-scroll-container" data-enabled={enabled.toString()} data-speed={speed}>
+  <slot />
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log("SmoothScroll: Component initialized");
+    
+    const container = document.querySelector('.smooth-scroll-container');
+    if (!container) {
+      console.error("SmoothScroll: Container not found");
+      return;
+    }
+    
+    const enabled = container.getAttribute('data-enabled') === 'true';
+    if (!enabled) {
+      console.log("SmoothScroll: Disabled via props");
+      return;
+    }
+    
+    const speed = parseFloat(container.getAttribute('data-speed') || '0.1');
+    console.log(`SmoothScroll: Speed set to ${speed}`);
+    
+    // Variables for smooth scrolling
+    let targetScrollY = 0; // Start at top
+    let currentScrollY = 0; // Start at top
+    let scrollAnimating = false;
+    let scrollEnabled = false; // Initially disabled
+    
+    console.log("SmoothScroll: Waiting for hero animation to complete");
+    
+    // Listen for animation complete event to enable scrolling
+    document.addEventListener('lottie-hero-animation-complete', () => {
+      console.log("SmoothScroll: Received animation complete event");
+      
+      // Wait a bit longer before enabling smooth scroll
+      setTimeout(() => {
+        scrollEnabled = true;
+        console.log("SmoothScroll: Scrolling enabled after delay");
+        
+        // Start at the beginning after hero animation
+        targetScrollY = 0;
+        currentScrollY = 0;
+        window.scrollTo(0, 0);
+        console.log("SmoothScroll: Reset scroll position to top");
+        
+        // Add our main scroll handlers
+        window.addEventListener('wheel', handleWheel, { passive: false });
+        window.addEventListener('touchstart', handleTouchStart, { passive: true });
+        window.addEventListener('touchmove', handleTouchMove, { passive: false });
+        window.addEventListener('keydown', handleKeyScroll, { passive: false });
+        console.log("SmoothScroll: Event listeners added");
+        
+        // Add debug indicator
+        showScrollStatus("Smooth scroll active");
+        
+        // Add a clear indication that scrolling is now enabled
+        const scrollNotice = document.createElement('div');
+        scrollNotice.textContent = "Scroll enabled";
+        scrollNotice.style.position = 'fixed';
+        scrollNotice.style.bottom = '80px';
+        scrollNotice.style.left = '50%';
+        scrollNotice.style.transform = 'translateX(-50%)';
+        scrollNotice.style.backgroundColor = 'rgba(0, 255, 0, 0.4)';
+        scrollNotice.style.color = 'white';
+        scrollNotice.style.padding = '5px 10px';
+        scrollNotice.style.borderRadius = '4px';
+        scrollNotice.style.zIndex = '9999';
+        scrollNotice.style.opacity = '0';
+        scrollNotice.style.transition = 'opacity 0.5s ease';
+        document.body.appendChild(scrollNotice);
+        
+        // Show the notice briefly
+        setTimeout(() => {
+          scrollNotice.style.opacity = '1';
+          setTimeout(() => {
+            scrollNotice.style.opacity = '0';
+            setTimeout(() => {
+              document.body.removeChild(scrollNotice);
+            }, 500);
+          }, 2000);
+        }, 100);
+      }, 800); // Longer delay for better transition
+    });
+    
+    // Debug function to show scroll status
+    function showScrollStatus(message) {
+      let statusEl = document.getElementById('smooth-scroll-status');
+      if (!statusEl) {
+        statusEl = document.createElement('div');
+        statusEl.id = 'smooth-scroll-status';
+        statusEl.style.position = 'fixed';
+        statusEl.style.bottom = '40px';
+        statusEl.style.left = '10px';
+        statusEl.style.backgroundColor = 'rgba(0,0,0,0.5)';
+        statusEl.style.color = 'white';
+        statusEl.style.padding = '5px 10px';
+        statusEl.style.borderRadius = '4px';
+        statusEl.style.fontSize = '12px';
+        statusEl.style.zIndex = '9999';
+        document.body.appendChild(statusEl);
+      }
+      
+      statusEl.textContent = message;
+      
+      // Add current scroll position
+      const positionEl = document.createElement('div');
+      positionEl.textContent = `Target: ${Math.round(targetScrollY)}, Current: ${Math.round(currentScrollY)}`;
+      statusEl.appendChild(positionEl);
+    }
+    
+    // Update target scroll position on wheel event
+    function handleWheel(e) {
+      if (!scrollEnabled) {
+        console.log("SmoothScroll: Wheel event ignored - scrolling not yet enabled");
+        return;
+      }
+      
+      // Prevent default only if we're handling the scroll
+      e.preventDefault();
+      
+      targetScrollY += e.deltaY;
+      targetScrollY = Math.max(0, targetScrollY); // Prevent negative scroll
+      
+      // Limit max scroll to document height
+      const maxScroll = document.body.scrollHeight - window.innerHeight;
+      targetScrollY = Math.min(targetScrollY, maxScroll);
+      
+      if (!scrollAnimating) {
+        scrollAnimating = true;
+        requestAnimationFrame(animateScroll);
+        console.log("SmoothScroll: Started scroll animation");
+      }
+      
+      showScrollStatus("Scrolling via wheel");
+    }
+    
+    // Touch event handling for mobile
+    let touchStartY = 0;
+    
+    function handleTouchStart(e) {
+      if (!scrollEnabled) return;
+      touchStartY = e.touches[0].clientY;
+      console.log(`SmoothScroll: Touch start at ${touchStartY}`);
+    }
+    
+    function handleTouchMove(e) {
+      if (!scrollEnabled) {
+        console.log("SmoothScroll: Touch event ignored - scrolling not yet enabled");
+        return;
+      }
+      
+      // Prevent default only if we're handling the scroll
+      e.preventDefault();
+      
+      const touchY = e.touches[0].clientY;
+      const deltaY = touchStartY - touchY;
+      
+      targetScrollY += deltaY * 2; // Adjust sensitivity
+      targetScrollY = Math.max(0, targetScrollY);
+      
+      const maxScroll = document.body.scrollHeight - window.innerHeight;
+      targetScrollY = Math.min(targetScrollY, maxScroll);
+      
+      touchStartY = touchY;
+      
+      if (!scrollAnimating) {
+        scrollAnimating = true;
+        requestAnimationFrame(animateScroll);
+        console.log("SmoothScroll: Started scroll animation from touch");
+      }
+      
+      showScrollStatus("Scrolling via touch");
+    }
+    
+    // Handle keyboard scrolling
+    function handleKeyScroll(e) {
+      if (!scrollEnabled) {
+        console.log("SmoothScroll: Keyboard event ignored - scrolling not yet enabled");
+        return;
+      }
+      
+      const scrollKeys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space'];
+      if (scrollKeys.includes(e.code)) {
+        e.preventDefault();
+        
+        let scrollAmount = 0;
+        
+        switch(e.code) {
+          case 'ArrowDown':
+            scrollAmount = 100;
+            break;
+          case 'ArrowUp':
+            scrollAmount = -100;
+            break;
+          case 'PageDown':
+            scrollAmount = 500;
+            break;
+          case 'PageUp':
+            scrollAmount = -500;
+            break;
+          case 'Space':
+            scrollAmount = 300;
+            break;
+        }
+        
+        targetScrollY += scrollAmount;
+        targetScrollY = Math.max(0, targetScrollY);
+        
+        const maxScroll = document.body.scrollHeight - window.innerHeight;
+        targetScrollY = Math.min(targetScrollY, maxScroll);
+        
+        if (!scrollAnimating) {
+          scrollAnimating = true;
+          requestAnimationFrame(animateScroll);
+          console.log("SmoothScroll: Started scroll animation from keyboard");
+        }
+        
+        showScrollStatus(`Scrolling via keyboard (${e.code})`);
+      }
+    }
+    
+    // Animation function for smooth scrolling
+    function animateScroll() {
+      // Calculate the distance between current and target scroll position
+      const scrollDiff = targetScrollY - currentScrollY;
+      
+      // If we're close enough to the target, stop animating
+      if (Math.abs(scrollDiff) < 0.5) {
+        currentScrollY = targetScrollY;
+        scrollAnimating = false;
+        window.scrollTo(0, currentScrollY);
+        showScrollStatus("Scroll complete");
+        return;
+      }
+      
+      // Apply easing to the scroll position
+      currentScrollY += scrollDiff * speed;
+      
+      // Apply the scroll position
+      window.scrollTo(0, currentScrollY);
+      
+      // Continue animation
+      requestAnimationFrame(animateScroll);
+    }
+    
+    // Add debug button for testing
+    const debugBtn = document.createElement('button');
+    debugBtn.textContent = "Test Smooth Scroll";
+    debugBtn.style.position = 'fixed';
+    debugBtn.style.top = '10px';
+    debugBtn.style.right = '10px';
+    debugBtn.style.zIndex = '9999';
+    debugBtn.style.padding = '5px';
+    debugBtn.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    debugBtn.style.color = 'white';
+    debugBtn.style.border = 'none';
+    
+    debugBtn.addEventListener('click', () => {
+      console.log("SmoothScroll: Manual test triggered");
+      
+      if (!scrollEnabled) {
+        // Dispatch animation complete event to force scrolling to be enabled
+        const completeEvent = new CustomEvent('lottie-hero-animation-complete', {
+          bubbles: true,
+          detail: { animationId: 'hero-animation' }
+        });
+        document.dispatchEvent(completeEvent);
+        console.log("SmoothScroll: Manually dispatched animation complete event");
+      } else {
+        // Test scrolling by simulating a scroll of 500px
+        targetScrollY += 500;
+        const maxScroll = document.body.scrollHeight - window.innerHeight;
+        targetScrollY = Math.min(targetScrollY, maxScroll);
+        
+        if (!scrollAnimating) {
+          scrollAnimating = true;
+          requestAnimationFrame(animateScroll);
+        }
+        
+        console.log(`SmoothScroll: Manual scroll to ${targetScrollY}`);
+        showScrollStatus("Manual test scroll +500px");
+      }
+    });
+    
+    document.body.appendChild(debugBtn);
+  });
+</script>
+
+<style>
+  .smooth-scroll-container {
+    position: relative;
+    width: 100%;
+    min-height: 100%;
+  }
+</style> 

@@ -1,0 +1,413 @@
+---
+interface Props {
+  animationPath: string;
+  triggerElement?: string;
+  startFrame?: number;
+  endFrame?: number;
+  scrub?: boolean;
+  markers?: boolean;
+  pin?: boolean;
+  once?: boolean;
+  onEnter?: string;
+  onLeave?: string;
+  debug?: boolean;
+  scale?: number;
+  containToViewport?: boolean;
+  renderer?: string;
+  frameByFrame?: boolean;
+}
+
+const {
+  animationPath,
+  triggerElement = "self",
+  startFrame = 0,
+  endFrame,
+  scrub = true,
+  markers = false,
+  pin = false,
+  once = false,
+  onEnter = "",
+  onLeave = "",
+  debug = false,
+  scale = 1,
+  containToViewport = false,
+  renderer = "svg",
+  frameByFrame = false,
+} = Astro.props;
+---
+
+<div 
+  class="scroll-trigger-animation"
+  data-animation-path={animationPath}
+  data-trigger-element={triggerElement}
+  data-start-frame={startFrame}
+  data-end-frame={endFrame}
+  data-scrub={scrub.toString()}
+  data-markers={markers.toString()}
+  data-pin={pin.toString()}
+  data-once={once.toString()}
+  data-on-enter={onEnter}
+  data-on-leave={onLeave}
+  data-debug={debug.toString()}
+  data-scale={scale}
+  data-contain-to-viewport={containToViewport.toString()}
+  data-renderer={renderer}
+  data-frame-by-frame={frameByFrame.toString()}
+>
+  <slot />
+</div>
+
+<script>
+  import lottie from 'https://cdn.skypack.dev/lottie-web';
+
+  class ScrollTriggerAnimation {
+    constructor(element) {
+      this.element = element;
+      this.animationPath = element.dataset.animationPath;
+      this.triggerElement = element.dataset.triggerElement;
+      this.startFrame = parseInt(element.dataset.startFrame || '0', 10);
+      this.endFrame = element.dataset.endFrame ? parseInt(element.dataset.endFrame, 10) : null;
+      this.scrub = element.dataset.scrub === 'true';
+      this.markers = element.dataset.markers === 'true';
+      this.pin = element.dataset.pin === 'true';
+      this.once = element.dataset.once === 'true';
+      this.onEnter = element.dataset.onEnter || '';
+      this.onLeave = element.dataset.onLeave || '';
+      this.debug = element.dataset.debug === 'true';
+      this.scale = parseFloat(element.dataset.scale || '1');
+      this.containToViewport = element.dataset.containToViewport === 'true';
+      this.renderer = element.dataset.renderer || 'svg';
+      this.frameByFrame = element.dataset.frameByFrame === 'true';
+
+      this.animation = null;
+      this.observer = null;
+      this.progress = 0;
+      this.isPlaying = false;
+      this.totalFrames = 0;
+      this.currentFrame = 0;
+      this.lastScrollTop = 0;
+      this.scrollDirection = 'down';
+
+      this.init();
+    }
+
+    init() {
+      // Create animation container
+      this.container = document.createElement('div');
+      this.container.classList.add('lottie-container');
+      
+      // Apply scale if provided
+      if (this.scale !== 1) {
+        this.container.style.transform = `scale(${this.scale})`;
+        this.container.style.transformOrigin = 'center center';
+      }
+      
+      // Apply contain to viewport if specified
+      if (this.containToViewport) {
+        this.container.classList.add('contain-to-viewport');
+      }
+      
+      this.element.appendChild(this.container);
+
+      // Load the Lottie animation
+      this.loadAnimation();
+    }
+
+    loadAnimation() {
+      this.animation = lottie.loadAnimation({
+        container: this.container,
+        renderer: this.renderer,
+        loop: false,
+        autoplay: false,
+        path: this.animationPath,
+      });
+
+      this.animation.addEventListener('DOMLoaded', () => {
+        this.totalFrames = this.animation.totalFrames;
+        
+        if (!this.endFrame || this.endFrame > this.totalFrames) {
+          this.endFrame = this.totalFrames;
+        }
+        
+        if (this.debug) {
+          console.log(`Animation loaded: ${this.animationPath}`);
+          console.log(`Total frames: ${this.totalFrames}`);
+          console.log(`Using frames: ${this.startFrame} to ${this.endFrame}`);
+        }
+
+        this.initObserver();
+        
+        // If animation is too large and containToViewport is true, fit it properly
+        if (this.containToViewport) {
+          this.fitAnimationToContainer();
+        }
+        
+        // Dispatch event when animation is loaded
+        const loadEvent = new CustomEvent('animation-loaded', {
+          detail: { 
+            element: this.element,
+            animation: this.animation,
+            totalFrames: this.totalFrames
+          }
+        });
+        document.dispatchEvent(loadEvent);
+      });
+      
+      // Add event listener for frame change if in debug mode
+      if (this.debug) {
+        this.animation.addEventListener('enterFrame', (e) => {
+          console.log(`Current frame: ${e.currentTime}/${this.totalFrames}`);
+        });
+      }
+    }
+    
+    fitAnimationToContainer() {
+      const svg = this.container.querySelector('svg');
+      if (svg) {
+        // Make SVG responsive
+        svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+        svg.style.width = '100%';
+        svg.style.height = 'auto';
+        svg.style.maxHeight = '100%';
+        svg.style.overflow = 'visible';
+        
+        // Get viewport dimensions
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        // Calculate appropriate scale based on animation size vs viewport
+        const svgWidth = svg.viewBox.baseVal.width;
+        const svgHeight = svg.viewBox.baseVal.height;
+        
+        // Calculate scale factors to fit width and height
+        const scaleX = viewportWidth / svgWidth;
+        const scaleY = viewportHeight / svgHeight;
+        
+        // Use the smaller scale to ensure it fits fully
+        const fitScale = Math.min(scaleX, scaleY) * 0.8; // 80% of full size to leave some margins
+        
+        // Apply the calculated scale
+        if (fitScale < 1) {
+          this.container.style.transform = `scale(${fitScale * this.scale})`;
+        }
+      }
+    }
+
+    initObserver() {
+      const options = {
+        root: null,
+        rootMargin: '0px',
+        threshold: this.buildThresholdList(),
+      };
+
+      this.observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            this.handleInView(entry);
+
+            if (this.once) {
+              this.observer.unobserve(this.element);
+            }
+          } else {
+            this.handleOutOfView(entry);
+          }
+        });
+      }, options);
+
+      // Observer target (self or another element)
+      const target = this.triggerElement === 'self' ? 
+        this.element : 
+        document.querySelector(this.triggerElement);
+      
+      if (target) {
+        this.observer.observe(target);
+      } else {
+        console.error(`ScrollTrigger: Target element "${this.triggerElement}" not found`);
+      }
+      
+      // Add resize listener to handle viewport changes if containToViewport is true
+      if (this.containToViewport) {
+        window.addEventListener('resize', () => {
+          this.fitAnimationToContainer();
+        });
+      }
+      
+      // Add scroll listener for frame-by-frame control if enabled
+      if (this.frameByFrame) {
+        this.setupFrameByFrameControl();
+      }
+    }
+    
+    setupFrameByFrameControl() {
+      // Listen for scroll events to control animation frame by frame
+      window.addEventListener('scroll', () => {
+        if (!this.isPlaying) return;
+        
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        // Determine scroll direction
+        this.scrollDirection = scrollTop > this.lastScrollTop ? 'down' : 'up';
+        this.lastScrollTop = scrollTop;
+        
+        // Calculate animation progress based on scroll position
+        const scrollHeight = Math.max(
+          document.body.scrollHeight, 
+          document.documentElement.scrollHeight,
+          document.body.offsetHeight, 
+          document.documentElement.offsetHeight
+        ) - window.innerHeight;
+        
+        // Use only a portion of the scroll for the animation
+        const scrollFactor = 0.3; // Use first 30% of page scroll for animation
+        const scrollPercentage = Math.min(scrollTop / (scrollHeight * scrollFactor), 1);
+        
+        // Map scroll percentage to frame range
+        const frameRange = this.endFrame - this.startFrame;
+        const targetFrame = this.startFrame + (frameRange * scrollPercentage);
+        
+        // Update animation to the calculated frame
+        if (this.animation && Math.abs(this.currentFrame - targetFrame) > 0.5) {
+          this.currentFrame = targetFrame;
+          this.animation.goToAndStop(this.currentFrame, true);
+          
+          // Dispatch frame change event
+          const frameEvent = new CustomEvent('frame-changed', {
+            detail: { 
+              element: this.element,
+              currentFrame: this.currentFrame,
+              totalFrames: this.totalFrames,
+              progress: scrollPercentage,
+              direction: this.scrollDirection
+            }
+          });
+          document.dispatchEvent(frameEvent);
+        }
+      });
+    }
+
+    buildThresholdList() {
+      // Create a threshold list with 20 steps for smooth tracking
+      const thresholds = [];
+      const steps = 20;
+      
+      for (let i = 0; i <= steps; i++) {
+        thresholds.push(i / steps);
+      }
+      
+      return thresholds;
+    }
+
+    handleInView(entry) {
+      if (this.onEnter && !this.isPlaying) {
+        // Dispatch event
+        const event = new CustomEvent(this.onEnter, {
+          detail: { element: this.element }
+        });
+        document.dispatchEvent(event);
+      }
+
+      this.isPlaying = true;
+
+      if (this.scrub && !this.frameByFrame) {
+        // Calculate animation progress based on intersection ratio
+        this.progress = entry.intersectionRatio;
+        const frame = this.startFrame + (this.endFrame - this.startFrame) * this.progress;
+        this.animation.goToAndStop(frame, true);
+      } else if (!this.frameByFrame) {
+        // Play from where we left off
+        this.animation.goToAndPlay(this.animation.currentFrame, true);
+      }
+
+      // Add visual markers in debug mode
+      if (this.markers && this.debug) {
+        this.element.style.outline = '2px solid green';
+        this.element.innerHTML += `<div class="debug-info" style="position: absolute; top: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 5px; font-size: 12px;">
+          Progress: ${Math.round(this.progress * 100)}%<br>
+          Frame: ${Math.round(this.animation.currentFrame)}/${this.totalFrames}
+        </div>`;
+      }
+
+      // Pin the element if needed
+      if (this.pin) {
+        this.element.style.position = 'sticky';
+        this.element.style.top = '0';
+        this.element.style.zIndex = '10';
+      }
+    }
+
+    handleOutOfView(entry) {
+      if (this.onLeave && this.isPlaying) {
+        // Dispatch event
+        const event = new CustomEvent(this.onLeave, {
+          detail: { element: this.element }
+        });
+        document.dispatchEvent(event);
+      }
+
+      this.isPlaying = false;
+      
+      // If not scrubbing or frame-by-frame, pause the animation
+      if (!this.scrub && !this.frameByFrame) {
+        this.animation.pause();
+      }
+
+      // Remove debug markers
+      if (this.markers && this.debug) {
+        this.element.style.outline = '';
+        const debugInfo = this.element.querySelector('.debug-info');
+        if (debugInfo) {
+          debugInfo.remove();
+        }
+      }
+    }
+    
+    // Method to manually control the animation frame
+    goToFrame(frame) {
+      if (this.animation) {
+        this.animation.goToAndStop(frame, true);
+        this.currentFrame = frame;
+      }
+    }
+  }
+
+  // Initialize all scroll trigger elements
+  document.addEventListener('DOMContentLoaded', () => {
+    const scrollTriggers = document.querySelectorAll('.scroll-trigger-animation');
+    const animationInstances = [];
+    
+    scrollTriggers.forEach(element => {
+      const instance = new ScrollTriggerAnimation(element);
+      animationInstances.push(instance);
+      
+      // Store the instance on the element for external access
+      element.animation = instance;
+    });
+    
+    // Make instances available globally for debugging
+    if (window.location.search.includes('debug=true')) {
+      window.scrollTriggerAnimations = animationInstances;
+    }
+  });
+</script>
+
+<style>
+  .scroll-trigger-animation {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .lottie-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .lottie-container.contain-to-viewport {
+    max-width: 100%;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+</style> 

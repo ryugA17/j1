@@ -1,0 +1,130 @@
+---
+import { Image } from 'astro:assets';
+import productPageImage from '../../../assets/Product page.png';
+
+interface Props {
+  title: string;
+  sizeIndicator: string;
+  price: string; // e.g., "$0 / hour"
+  description: string;
+  specifications: Array<{ label: string; value: string }>;
+}
+
+const { title, sizeIndicator, price, description, specifications } = Astro.props;
+---
+
+<div class="pricing-card-new">
+  <div class="card-header-new">
+    <h3 class="title-new">{title}</h3>
+    <span class="size-indicator-new">{sizeIndicator}</span>
+  </div>
+  <p class="price-new">{price}</p>
+  <p class="description-new">{description}</p>
+  <ul class="specs-list-new">
+    {specifications.map(spec => (
+      <li class="spec-item-new">
+        <span class="spec-label-new">{spec.label}</span>
+        <span class="spec-value-new">{spec.value}</span>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .pricing-card-new {
+    background-color: #F2F1ED; /* Updated to the provided hex code */
+    border-radius: 20px; /* Updated */
+    padding: 30px; /* Updated */
+    display: flex;
+    flex-direction: column;
+    width: 429px; /* Added */
+    min-height: 533px; /* Changed from height to min-height */
+    border: 1px solid #efefef;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .card-header-new {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px; /* Adjusted for tighter spacing like image */
+  }
+
+  .title-new {
+    font-size: 26px;
+    font-weight: 500;
+    color: #2c2c2c;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .size-indicator-new {
+    font-size: 11px;
+    font-weight: 500;
+    color: #858585;
+    text-transform: uppercase;
+    background-color: #e7e7e7; /* Slightly adjusted to complement new card background */
+    padding: 5px 10px;
+    border-radius: 5px;
+    letter-spacing: 0.5px;
+  }
+
+  .price-new {
+    font-size: 44px;
+    font-weight: 600;
+    color: #2c2c2c;
+    margin: 0 0 12px 0; /* Adjusted for more space like image */
+    line-height: 1.1;
+  }
+
+  .description-new {
+    font-size: 15px;
+    color: #606060;
+    line-height: 1.55;
+    margin: 0 0 20px 0; /* Increased space after description */
+  }
+
+  .specs-list-new {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+  }
+
+  .spec-item-new {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    border-bottom: 1px solid #d0d0d0;
+    padding: 15px 0;
+  }
+
+  .spec-item-new:last-child {
+    border-bottom: none;
+  }
+
+  .spec-label-new {
+    color: #707070;
+    font-weight: 400;
+  }
+
+  .spec-value-new {
+    color: #333333;
+    font-weight: 500;
+    text-align: right;
+  }
+
+  /* Remove old styles that are no longer needed */
+  /* .pricing-card, .popular, .popular-badge, .card-image, 
+     .background-image, .card-content, .card-header, .description, 
+     .price-container, .price, .period, .features-list, 
+     .feature-item, .check-icon, .pricing-button no longer exist 
+     in this structure or have been renamed and restyled.
+     Media queries might need adjustment if this component is used 
+     in a responsive grid that changes its width significantly.
+  */
+</style>

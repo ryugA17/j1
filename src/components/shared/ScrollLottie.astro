@@ -1,0 +1,416 @@
+---
+interface Props {
+  src: string;
+  height?: string;
+  width?: string;
+  zIndex?: number;
+  position?: string;
+  className?: string;
+  scrollFactor?: number; // How much scroll affects animation progress
+}
+
+const { 
+  src, 
+  height = "100vh", 
+  width = "100%", 
+  zIndex = 1, 
+  position = "absolute", 
+  className = "",
+  scrollFactor = 1 // Default scroll sensitivity
+} = Astro.props;
+
+// Generate a unique ID for this component instance
+const uniqueId = 'lottie-container-' + Math.random().toString(36).substring(2, 15);
+---
+
+<div id={uniqueId} class={`scroll-lottie ${className}`} data-lottie-src={src}>
+  <!-- Lottie animation will be loaded here -->
+</div>
+
+<!-- Import lottie-web from CDN to avoid import errors -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+
+<script define:vars={{uniqueId, src, height, width, zIndex, position, scrollFactor}}>
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log(`ScrollLottie: Component initialized (${uniqueId})`);
+    
+    const container = document.getElementById(uniqueId);
+    if (!container) {
+      console.error(`ScrollLottie: Container not found (${uniqueId})`);
+      return;
+    }
+
+    // Set CSS custom properties directly on the container
+    container.style.setProperty('--height', height);
+    container.style.setProperty('--width', width);
+    container.style.setProperty('--z-index', zIndex);
+    container.style.setProperty('--position', position);
+    
+    // Use the src directly from props instead of getting from attribute
+    const lottieUrl = src;
+    if (!lottieUrl) {
+      console.error("ScrollLottie: No lottie URL provided");
+      return;
+    }
+
+    console.log("ScrollLottie: Loading animation from", lottieUrl);
+
+    let animation = null;
+    let totalFrames = 0;
+    let frameRate = 0;
+    let animationDuration = 0;
+    let isAnimationComplete = false;
+    let scrollBlocked = false;
+    let lastScrollPosition = window.scrollY;
+    let lastScrollTime = Date.now();
+    
+    let scrollJustUnblocked = false;
+    
+    // Create status indicator
+    const statusIndicator = document.createElement('div');
+    statusIndicator.style.position = 'fixed';
+    statusIndicator.style.bottom = '10px';
+    statusIndicator.style.left = '10px';
+    statusIndicator.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    statusIndicator.style.color = 'white';
+    statusIndicator.style.padding = '5px 10px';
+    statusIndicator.style.borderRadius = '4px';
+    statusIndicator.style.fontSize = '12px';
+    statusIndicator.style.zIndex = '9999';
+    statusIndicator.textContent = 'Loading animation...';
+    document.body.appendChild(statusIndicator);
+    
+    // Use a simpler approach to loading the animation
+    try {
+      // Access the global lottie object from the CDN
+      if (typeof window.lottie === 'undefined') {
+        throw new Error("Lottie library not loaded");
+      }
+      
+      animation = window.lottie.loadAnimation({
+        container: container,
+        renderer: 'svg',
+        loop: false,
+        autoplay: false, // Make sure autoplay is off to control with scroll
+        path: lottieUrl
+      });
+      
+      console.log("ScrollLottie: Animation created");
+      statusIndicator.textContent = 'Loading animation...';
+      
+      animation.addEventListener('DOMLoaded', () => {
+        console.log("ScrollLottie: Animation DOM loaded");
+        
+        totalFrames = animation.totalFrames;
+        frameRate = animation.frameRate;
+        animationDuration = totalFrames / frameRate;
+        
+        console.log(`ScrollLottie: Total frames: ${totalFrames}, Frame rate: ${frameRate}`);
+        statusIndicator.textContent = `Ready: Scroll to control animation`;
+        
+        // Go to first frame and stop
+        animation.goToAndStop(0, true);
+        
+        // Block scrolling until user starts interacting
+        scrollBlocked = true;
+        document.body.style.overflow = 'hidden';
+        
+        // Initial progress event
+        emitScrollProgressEvent(0);
+        
+        // Add scroll event listeners with a slight delay
+        setTimeout(() => {
+          window.addEventListener('wheel', handleScroll, { passive: false });
+          window.addEventListener('touchmove', handleTouchMove, { passive: false });
+          window.addEventListener('keydown', handleKeyScroll, { passive: false });
+          
+          // Also listen for mouse movement to give better visual feedback
+          window.addEventListener('mousemove', handleMouseMove, { passive: true });
+          
+          console.log("ScrollLottie: Scroll event listeners added");
+          
+          // Add visual indicator to start scrolling
+          showScrollPrompt();
+        }, 500);
+      });
+      
+      // Add error handling
+      animation.addEventListener('error', (error) => {
+        console.error("ScrollLottie: Animation error", error);
+        statusIndicator.textContent = `Error: ${error.message || 'Unknown error'}`;
+      });
+      
+    } catch (error) {
+      console.error("ScrollLottie: Error creating animation", error);
+      statusIndicator.textContent = `Error: ${error.message}`;
+    }
+    
+    // Show a prompt to encourage scrolling
+    function showScrollPrompt() {
+      const prompt = document.createElement('div');
+      prompt.style.position = 'fixed';
+      prompt.style.top = '50%';
+      prompt.style.left = '50%';
+      prompt.style.transform = 'translate(-50%, -50%)';
+      prompt.style.padding = '20px';
+      prompt.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+      prompt.style.color = 'white';
+      prompt.style.borderRadius = '8px';
+      prompt.style.textAlign = 'center';
+      prompt.style.zIndex = '9999';
+      prompt.style.animation = 'fadeInOut 2s ease-in-out infinite';
+      prompt.innerHTML = `
+        <p>Scroll to control the animation</p>
+        <svg width="24" height="24" viewBox="0 0 24 24" style="margin: 10px auto; display: block;">
+          <path d="M12 5V19M12 19L19 12M12 19L5 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `;
+      
+      // Add animation keyframes
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes fadeInOut {
+          0% { opacity: 0.5; }
+          50% { opacity: 1; }
+          100% { opacity: 0.5; }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      document.body.appendChild(prompt);
+      
+      // Remove after first scroll
+      const removePrompt = () => {
+        prompt.style.opacity = '0';
+        prompt.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => {
+          if (prompt.parentNode) {
+            document.body.removeChild(prompt);
+          }
+        }, 500);
+        window.removeEventListener('wheel', removePrompt);
+        window.removeEventListener('touchmove', removePrompt);
+        window.removeEventListener('keydown', removePrompt);
+      };
+      
+      window.addEventListener('wheel', removePrompt, { once: true });
+      window.addEventListener('touchmove', removePrompt, { once: true });
+      window.addEventListener('keydown', (e) => {
+        if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space'].includes(e.code)) {
+          removePrompt();
+        }
+      }, { once: true });
+    }
+    
+    function emitScrollProgressEvent(frame) {
+      if (!totalFrames) return;
+      
+      const progressPercent = Math.round((frame / totalFrames) * 100);
+      const event = new CustomEvent('lottie-hero-scroll-progress', {
+        bubbles: true,
+        detail: { 
+          frame: frame,
+          totalFrames: totalFrames,
+          progress: progressPercent,
+          instanceId: uniqueId
+        }
+      });
+      window.dispatchEvent(event);
+      
+      statusIndicator.textContent = `Progress: ${progressPercent}%`;
+      
+      if (progressPercent % 10 === 0) {
+        console.log(`ScrollLottie: Progress - ${progressPercent}%`);
+      }
+      
+      // Automatically complete when we reach 99% to ensure we don't get stuck
+      if (progressPercent >= 99 && !isAnimationComplete) {
+        completeAnimation();
+      }
+    }
+    
+    function completeAnimation() {
+      if (isAnimationComplete) {
+        console.log("ScrollLottie: Animation already completed, ignoring");
+        return;
+      }
+      
+      console.log("ScrollLottie: Completing animation");
+      statusIndicator.textContent = 'Animation complete';
+      
+      isAnimationComplete = true;
+      scrollBlocked = false;
+      document.body.style.overflow = '';
+      scrollJustUnblocked = true;
+      
+      // Ensure we're at the very end
+      animation.goToAndStop(totalFrames, true);
+      
+      // Reset scroll position to ensure clean continuation
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        console.log("ScrollLottie: Reset scroll position to top");
+      }, 100);
+      
+      // Emit final progress event
+      emitScrollProgressEvent(totalFrames);
+      
+      // Dispatch complete event
+      const event = new CustomEvent('lottie-hero-animation-complete', {
+        bubbles: true,
+        detail: { 
+          animationId: 'hero-animation',
+          instanceId: uniqueId
+        }
+      });
+      document.dispatchEvent(event);
+      console.log("ScrollLottie: Animation complete event dispatched");
+      
+      // Remove scroll control events
+      window.removeEventListener('wheel', handleScroll);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('keydown', handleKeyScroll);
+      window.removeEventListener('mousemove', handleMouseMove);
+      console.log("ScrollLottie: Event listeners removed");
+      
+      // Reset status after delay
+      setTimeout(() => {
+        scrollJustUnblocked = false;
+        console.log("ScrollLottie: Scroll unblocked completely");
+        
+        // Remove the status indicator
+        setTimeout(() => {
+          statusIndicator.style.opacity = '0';
+          statusIndicator.style.transition = 'opacity 0.5s ease';
+          setTimeout(() => {
+            if (statusIndicator.parentNode) {
+              document.body.removeChild(statusIndicator);
+            }
+          }, 500);
+        }, 1000);
+      }, 300);
+    }
+    
+    function handleScroll(event) {
+      if (scrollBlocked && !scrollJustUnblocked) {
+        event.preventDefault();
+        
+        const delta = event.deltaY || 0;
+        const currentTime = Date.now();
+        
+        // Apply scroll factor to adjust sensitivity
+        const framesToAdvance = Math.max(1, Math.min(3, Math.abs(delta / 100) * scrollFactor));
+        
+        if (delta > 0) {
+          // Scroll down - advance animation
+          const newFrame = Math.min(animation.currentFrame + framesToAdvance, totalFrames);
+          animation.goToAndStop(newFrame, true);
+          
+          emitScrollProgressEvent(newFrame);
+          
+          if (newFrame >= totalFrames - 1) {
+            console.log("ScrollLottie: Animation reached end via scroll");
+            completeAnimation();
+          }
+        } else if (delta < 0 && animation.currentFrame > 0) {
+          // Scroll up - rewind animation
+          const newFrame = Math.max(animation.currentFrame - framesToAdvance, 0);
+          animation.goToAndStop(newFrame, true);
+          
+          emitScrollProgressEvent(newFrame);
+        }
+        
+        lastScrollTime = currentTime;
+      }
+    }
+    
+    function handleTouchMove(event) {
+      if (scrollBlocked && !scrollJustUnblocked) {
+        event.preventDefault();
+        
+        const touchY = event.touches[0]?.clientY || 0;
+        const delta = lastScrollPosition - touchY;
+        const currentTime = Date.now();
+        
+        // Apply scroll factor to adjust sensitivity
+        const framesToAdvance = Math.max(1, Math.min(3, Math.abs(delta / 50) * scrollFactor));
+        
+        if (delta > 0) {
+          // Moving finger up (scroll down) - advance animation
+          const newFrame = Math.min(animation.currentFrame + framesToAdvance, totalFrames);
+          animation.goToAndStop(newFrame, true);
+          
+          emitScrollProgressEvent(newFrame);
+          
+          if (newFrame >= totalFrames - 1) {
+            completeAnimation();
+          }
+        } else if (delta < 0 && animation.currentFrame > 0) {
+          // Moving finger down (scroll up) - rewind animation
+          const newFrame = Math.max(animation.currentFrame - framesToAdvance, 0);
+          animation.goToAndStop(newFrame, true);
+          
+          emitScrollProgressEvent(newFrame);
+        }
+        
+        lastScrollPosition = touchY;
+        lastScrollTime = currentTime;
+      }
+    }
+    
+    function handleKeyScroll(event) {
+      if (scrollBlocked && !scrollJustUnblocked) {
+        const scrollKeys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space'];
+        if (scrollKeys.includes(event.code)) {
+          event.preventDefault();
+          
+          const isScrollDown = ['ArrowDown', 'PageDown', 'Space'].includes(event.code);
+          const isLargeStep = ['PageDown', 'PageUp'].includes(event.code);
+          
+          // Adjust frames to advance based on key type
+          const framesToAdvance = isLargeStep ? 5 * scrollFactor : 2 * scrollFactor;
+          
+          if (isScrollDown) {
+            // Advance animation
+            const newFrame = Math.min(animation.currentFrame + framesToAdvance, totalFrames);
+            animation.goToAndStop(newFrame, true);
+            
+            emitScrollProgressEvent(newFrame);
+            
+            if (newFrame >= totalFrames - 1) {
+              completeAnimation();
+            }
+          } else if (animation.currentFrame > 0) {
+            // Rewind animation
+            const newFrame = Math.max(animation.currentFrame - framesToAdvance, 0);
+            animation.goToAndStop(newFrame, true);
+            
+            emitScrollProgressEvent(newFrame);
+          }
+        }
+      }
+    }
+    
+    // Visual feedback based on mouse movement
+    function handleMouseMove(event) {
+      if (scrollBlocked && !isAnimationComplete) {
+        // This just provides visual feedback and doesn't actually scroll
+        const heightPercent = event.clientY / window.innerHeight;
+        
+        // Update status with mouse position
+        statusIndicator.textContent = `Scroll to advance: ${Math.round(heightPercent * 100)}%`;
+      }
+    }
+  });
+</script>
+
+<style>
+  .scroll-lottie {
+    position: var(--position);
+    height: var(--height);
+    width: var(--width);
+    z-index: var(--z-index);
+    top: 0;
+    left: 0;
+  }
+</style> 

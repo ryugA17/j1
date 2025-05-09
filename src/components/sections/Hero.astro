@@ -1,38 +1,223 @@
 ---
 import Button from "../shared/Button.astro";
+import ScrollIndicator from "../shared/ScrollIndicator.astro";
+import ScrollTriggerContainer from "../shared/ScrollTriggerContainer.astro";
+import ScrollTrigger from "../shared/ScrollTrigger.astro";
 ---
 
-<section class="hero">
-  <!-- Load dotlottie-player only once -->
-  <script
-    src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"
-    type="module"></script>
-
-  <!-- Background Lottie layers -->
-  <dotlottie-player
-    src="https://lottie.host/e40328b2-ad68-4d04-beca-7147b7536dfd/gmvXbOAfij.lottie"
-    background="transparent"
-    speed="1"
-    style="position: absolute; bottom: 0; height: 100vh; z-index: 0;"
-    loop
-    autoplay></dotlottie-player>
-
-  <dotlottie-player
-    src="https://lottie.host/e68f35be-7a8d-4682-ab46-46d4812f87ed/CucyMkCQjB.lottie"
-    background="transparent"
-    speed="1"
-    style="position: absolute; bottom: 0; height: 60vh; z-index: 2;"
-    loop
-    autoplay></dotlottie-player>
-
-  <!-- Hero content -->
-  <div class="hero-content">
-    <h1>Engineered for speed, <br /> managed for you</h1>
-    <p>Fully-managed real-time database for Amazon and Google clouds</p>
+<section class="hero" id="hero-section">
+  <!-- Background animation with circles.json -->
+  <div class="hero-background">
+    <ScrollTrigger 
+      animationPath="/animations/circles.json"
+      triggerElement="#hero-section"
+      scrub={true}
+      pin={false}
+      debug={false}
+      onEnter="hero-animation-started"
+      onLeave="hero-animation-complete"
+    />
   </div>
 
-  <Button>Join the preview</Button>
+  <!-- Widget components with controlled size -->
+  <div class="widgets-container">
+    <ScrollTrigger 
+      animationPath="/animations/widgets.json"
+      triggerElement="#hero-section"
+      scrub={true}
+      pin={false}
+      debug={false}
+    />
+  </div>
+
+  <div class="content-wrapper">
+    <!-- Hero content -->
+    <div class="hero-content">
+      <h1 class="scroll-reveal" data-scroll-reveal-point="10">Engineered for speed, <br /> managed for you</h1>
+      <p class="scroll-reveal" data-scroll-reveal-point="20">Fully-managed real-time database for Amazon and Google clouds</p>
+      
+      <!-- Button -->
+      <div class="scroll-reveal button-container" data-scroll-reveal-point="30">
+        <Button>Join the preview</Button>
+      </div>
+    </div>
+    
+    <!-- UI Components side by side -->
+    <div class="ui-components">
+      <!-- Cloud provider selector -->
+      <div class="cloud-selector-container" data-scroll-trigger data-trigger-at="15" data-animation-type="fade-in">
+        <h3>Choose your cloud and region</h3>
+        <div class="cloud-options">
+          <div class="cloud-option selected" tabindex="0" role="button" aria-pressed="true">
+            <span class="cloud-name">AWS</span>
+          </div>
+          <div class="cloud-option" tabindex="0" role="button" aria-pressed="false">
+            <span class="cloud-name">Google Cloud</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Database customization UI -->
+      <div class="database-customizer" data-scroll-trigger data-trigger-at="35" data-animation-type="fade-in">
+        <h3>Customize your database</h3>
+        <div class="setting-row">
+          <span>Number of Zones</span>
+          <div class="number-control">
+            <button class="decrease" aria-label="Decrease number of zones">-</button>
+            <span class="value">2</span>
+            <button class="increase" aria-label="Increase number of zones">+</button>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="setting-row">
+          <span>Replication Factor</span>
+          <div class="number-control">
+            <button class="decrease" aria-label="Decrease replication factor">-</button>
+            <span class="value">2</span>
+            <button class="increase" aria-label="Increase replication factor">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll indicator appears at the bottom -->
+  <ScrollIndicator text="Scroll to explore" showAfterAnimation={false} />
 </section>
+
+<!-- Load dotlottie-player for the overlay animation -->
+<script
+  src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"
+  type="module"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log("Hero: Component initialized");
+    
+    const heroSection = document.getElementById('hero-section');
+    if (!heroSection) {
+      console.error("Hero: Hero section element not found");
+      return;
+    }
+    
+    // Force hero to be at least 100vh
+    heroSection.style.height = '100vh';
+    heroSection.style.minHeight = '100vh';
+    console.log("Hero: Set height to 100vh");
+    
+    // Ensure the hero section is visible
+    heroSection.style.display = 'flex';
+    heroSection.style.visibility = 'visible';
+    heroSection.style.opacity = '1';
+    
+    // Set up number controls for the database customizer
+    setupNumberControls();
+    
+    // Set up cloud provider selection
+    setupCloudSelection();
+
+    // Set up scroll reveal elements
+    setupScrollReveal();
+    
+    // Handle cloud provider selection
+    function setupCloudSelection() {
+      const cloudOptions = document.querySelectorAll('.cloud-option');
+      cloudOptions.forEach(option => {
+        option.addEventListener('click', () => {
+          // Remove selected class from all options
+          cloudOptions.forEach(opt => {
+            opt.classList.remove('selected');
+            opt.setAttribute('aria-pressed', 'false');
+          });
+          
+          // Add selected class to clicked option
+          option.classList.add('selected');
+          option.setAttribute('aria-pressed', 'true');
+        });
+        
+        // Also handle keyboard navigation
+        option.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            option.click();
+          }
+        });
+      });
+    }
+    
+    // Handle database customizer number controls
+    function setupNumberControls() {
+      const numberControls = document.querySelectorAll('.number-control');
+      numberControls.forEach(control => {
+        const decreaseBtn = control.querySelector('.decrease');
+        const increaseBtn = control.querySelector('.increase');
+        const valueEl = control.querySelector('.value');
+        
+        if (decreaseBtn && increaseBtn && valueEl) {
+          let value = parseInt(valueEl.textContent || '2');
+          
+          decreaseBtn.addEventListener('click', () => {
+            if (value > 1) {
+              value--;
+              valueEl.textContent = value.toString();
+            }
+          });
+          
+          increaseBtn.addEventListener('click', () => {
+            if (value < 5) {
+              value++;
+              valueEl.textContent = value.toString();
+            }
+          });
+        }
+      });
+    }
+
+    // Set up scroll-based reveal animations
+    function setupScrollReveal() {
+      const revealElements = document.querySelectorAll('.scroll-reveal');
+      
+      // Create an intersection observer to watch for elements scrolling into view
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const element = entry.target;
+            element.classList.add('revealed');
+            // Optionally stop observing this element after it's been revealed
+            observer.unobserve(element);
+          }
+        });
+      }, {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1 // Trigger when at least 10% of the element is visible
+      });
+      
+      // Start observing all reveal elements
+      revealElements.forEach(element => {
+        observer.observe(element);
+      });
+      
+      // Also handle scroll events to track scroll position for finer control
+      window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY;
+        const viewportHeight = window.innerHeight;
+        
+        revealElements.forEach(element => {
+          const revealPoint = parseInt(element.dataset.scrollRevealPoint || "0");
+          const triggerPosition = viewportHeight * (revealPoint / 100);
+          
+          if (scrollY > triggerPosition) {
+            element.classList.add('revealed');
+          }
+        });
+      });
+    }
+    
+    // Initial call for elements that should be visible on load
+    setupScrollReveal();
+  });
+</script>
 
 <style>
   .hero {
@@ -41,8 +226,7 @@ import Button from "../shared/Button.astro";
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 120px;
-    text-align: center;
+    justify-content: center;
     overflow: hidden;
     background: linear-gradient(
       to bottom,
@@ -51,27 +235,297 @@ import Button from "../shared/Button.astro";
     );
   }
 
-  .hero-content {
-    position: relative;
+  /* Full-size background */
+  .hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    opacity: 0.4; /* More subtle background */
+  }
+
+  /* Contained widgets animation */
+  .widgets-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     z-index: 1;
-    max-width: 625px;
-    margin: 0 auto 20px;
+    pointer-events: none;
+    opacity: 0.7; /* Slightly more visible but not dominant */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Make sure SVG is properly centered */
+  .widgets-container :global(svg) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 100%;
+    max-height: 100%;
+    width: auto !important;
+    height: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: block !important;
+  }
+
+  /* Content layout wrapper */
+  .content-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    z-index: 2;
     display: flex;
     flex-direction: column;
-    gap: 24px;
     align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 2rem;
+  }
+
+  /* Hero content - centered and larger */
+  .hero-content {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
     color: var(--color-white);
-    line-height: 1;
+    margin-bottom: 5rem;
+  }
+
+  .hero-content h1 {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
   }
 
   .hero p {
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
     color: var(--color-subtle-text);
+    max-width: 600px;
+    margin: 0 auto 2rem;
+  }
+
+  /* Component layout container */
+  .ui-components {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  /* Cloud selector styling - smaller and to the left */
+  .cloud-selector-container {
+    position: relative;
+    background-color: rgba(21, 45, 84, 0.7);
+    border-radius: 12px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    width: 48%;
+    max-width: 400px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .cloud-selector-container h3 {
+    color: var(--color-white);
+    font-size: 16px;
+    margin-bottom: 12px;
+    text-align: left;
+  }
+
+  .cloud-options {
+    display: flex;
+    gap: 12px;
+  }
+
+  .cloud-option {
+    flex: 1;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .cloud-option:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .cloud-option:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-accent, #4dabf7);
+  }
+
+  .cloud-option.selected {
+    border-color: var(--color-accent, #4dabf7);
+    background-color: rgba(77, 171, 247, 0.1);
+  }
+
+  .cloud-name {
+    color: var(--color-white);
+    font-weight: 500;
+    font-size: 16px;
+  }
+
+  /* Database customizer styling - smaller and to the right */
+  .database-customizer {
+    position: relative;
+    background-color: rgba(21, 45, 84, 0.7);
+    border-radius: 12px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    width: 48%;
+    max-width: 400px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .database-customizer h3 {
+    color: var(--color-white);
+    font-size: 16px;
+    margin-bottom: 16px;
+    text-align: left;
+  }
+
+  .setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--color-white);
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+
+  .divider {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin: 12px 0;
+  }
+
+  .number-control {
+    display: flex;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .number-control button {
+    background: transparent;
+    border: none;
+    color: var(--color-white);
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+  }
+
+  .number-control button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .number-control button:active {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .number-control button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-accent, #4dabf7);
+  }
+
+  .number-control .value {
+    padding: 0 12px;
+    font-weight: 500;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  /* Scroll reveal animations */
+  .scroll-reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .scroll-reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .button-container {
+    margin-top: 20px;
+    z-index: 3;
+  }
+
+  /* Show elements when their container is triggered */
+  [data-scroll-trigger].visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 860px) {
+    .ui-components {
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .cloud-selector-container,
+    .database-customizer {
+      width: 100%;
+      max-width: 480px;
+    }
+    
+    .hero-content {
+      margin-bottom: 2rem;
+    }
   }
 
   @media (max-width: 560px) {
+    .cloud-selector-container h3,
+    .database-customizer h3 {
+      font-size: 14px;
+    }
+    
+    .cloud-name {
+      font-size: 14px;
+    }
+    
+    .setting-row {
+      font-size: 12px;
+    }
+    
+    .hero-content h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+    }
+    
     .hero p {
-      color: var(--color-subtle-text);
-      max-width: 292px;
+      font-size: clamp(1rem, 2vw, 1.2rem);
     }
   }
 </style>

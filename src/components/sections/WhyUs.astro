@@ -1,20 +1,113 @@
 ---
 import SectionName from "../shared/SectionName.astro";
 import SectionHeading from "../shared/SectionHeading.astro";
+import Container from "../shared/Container.astro";
+import { Image } from 'astro:assets';
+import newChartImage from '../../assets/Aerospike-v-DynamoDB.png';
+import atlasChartImage from '../../assets/Frame 2147204655.png';
+import mediaImage from '../../assets/Media.png'; // This image contains the testimonial card
+import iconStats1 from '../../assets/Frame 2147204653.png';
+import iconStats2 from '../../assets/Group 10124044.png';
+import iconStats3 from '../../assets/Frame 2147204652.png';
+// Removed dream11Logo and amitGardeImage imports as they are part of mediaImage
 ---
 
 <section>
-  <div class="texts">
-    <SectionName>Why Aerospike Cloud</SectionName>
-    <SectionHeading
-      >The fully managed database that scales -without the hyperscale invoice</SectionHeading
-    >
-  </div>
+  <Container>
+    <div class="texts">
+      <SectionName>Why Aerospike Cloud</SectionName>
+      <SectionHeading
+        >The fully managed database that scales -without the hyperscale invoice</SectionHeading
+      >
+    </div>
+
+    <!-- Original cost-comparison-layout -->
+    <div class="cost-comparison-layout">
+      <div class="cost-comparison-left">
+        <h2>Avoid hyperscaling invoices</h2>
+        <div class="text-block">
+          <h3>Do more, without paying per transaction</h3>
+          <p>Unlike cloud-vendor databases, Aerospike Cloud doesn't charge for transactions.</p>
+        </div>
+        <div class="text-block">
+          <h3>Avoid hyperscale lock-in</h3>
+          <p>Run on AWS or GCP today—switch clouds or choose your own data center in the future.</p>
+        </div>
+      </div>
+      <div class="cost-comparison-right">
+        <div class="comparison-card">
+          <div class="card-text-content">
+            <h4>Aerospike vs. DynamoDB</h4>
+            <a href="#" class="report-link">Download the report &rarr;</a>
+          </div>
+          <div class="card-chart-area">
+            <Image src={newChartImage} alt="Aerospike vs. DynamoDB cost chart" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- New cost-comparison-layout for MongoDB Atlas -->
+    <div class="cost-comparison-layout space-above">
+      <div class="cost-comparison-left">
+        <h2>Give yourself headroom</h2>
+        <div class="text-block">
+          <h3>Ship fast and plan to last</h3>
+          <p>Performance holds steady as your data grows, with no latency cliffs, and no re-platforming later.</p>
+        </div>
+        <div class="text-block">
+          <h3>Focus on features, not fire drills</h3>
+          <p>Handle failovers, rebalancing, and reconfigurations automatically, with no dropped traffic, and no scrambling.</p>
+        </div>
+      </div>
+      <div class="cost-comparison-right">
+        <div class="comparison-card">
+          <div class="card-text-content">
+            <h4>Aerospike vs. MongoDB Atlas</h4>
+            <a href="#" class="report-link">Download the whitepaper &rarr;</a>
+          </div>
+          <div class="card-chart-area">
+            <Image src={atlasChartImage} alt="Aerospike vs. MongoDB Atlas chart" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Testimonial and Stats Section - Simplified Left Column -->
+    <div class="testimonial-stats-layout space-above">
+      <div class="testimonial-image-column">
+        <Image src={mediaImage} alt="Testimonial including Dream11 showcase" class="main-media-image" />
+        <!-- Removed the div.testimonial-card and its contents -->
+      </div>
+      <div class="stats-column">
+        <h3>When billions tune in, Dream11 can't drop the ball</h3>
+        <p class="stats-subtext">
+          The world's largest fantasy sports platform trusts Aerospike to manage data on <span class="aws-logo">AWS</span>
+        </p>
+        <ul class="stats-list">
+          <li class="stats-item">
+            <Image src={iconStats1} alt="Data graph icon" class="stat-icon" />
+            <span>35 TB added per day</span>
+          </li>
+          <li class="stats-item">
+            <Image src={iconStats2} alt="Data transfer icon" class="stat-icon" />
+            <span>Millions of tx/sec</span>
+          </li>
+          <li class="stats-item">
+            <Image src={iconStats3} alt="Clock icon" class="stat-icon" />
+            <span>Sustained sub-&lt;1ms latency</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </Container>
 </section>
 
 <style>
   section {
     padding: 60px 0;
+    background-color: var(--color-background);
   }
 
   .texts {
@@ -23,5 +116,211 @@ import SectionHeading from "../shared/SectionHeading.astro";
     gap: 20px;
     text-align: center;
     margin-top: 40px;
+    margin-bottom: 60px;
+  }
+
+  .cost-comparison-layout {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+  }
+
+  .cost-comparison-layout.space-above {
+    margin-top: 100px;
+  }
+
+  .cost-comparison-left {
+    width: 35%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .cost-comparison-left h2 {
+    font-family: "Tiempos", serif;
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--color-foreground);
+  }
+
+  .cost-comparison-left .text-block h3 {
+    font-family: "Tiempos", serif;
+    font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+    font-weight: 500;
+    margin-bottom: 10px;
+    color: var(--color-foreground);
+  }
+
+  .cost-comparison-left .text-block p {
+    font-size: clamp(0.9rem, 2vw, 1rem);
+    color: var(--color-muted-foreground);
+    line-height: 1.6;
+  }
+
+  .cost-comparison-right {
+    width: 65%;
+  }
+
+  .comparison-card {
+    background-color: var(--color-accent, #f6f5f1);
+    border-radius: 20px;
+    padding: 30px;
+    display: flex;
+    gap: 24px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+    height: 100%;
+  }
+
+  .comparison-card .card-text-content {
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .comparison-card .card-text-content h4 {
+    font-family: "Tiempos", serif;
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
+    font-weight: 500;
+    color: var(--color-foreground);
+    margin-bottom: 16px;
+  }
+
+  .comparison-card .report-link {
+    font-size: clamp(0.9rem, 2vw, 1rem);
+    font-weight: 500;
+    color: var(--color-secondary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    margin-top: auto;
+  }
+
+  .comparison-card .report-link:hover {
+    color: var(--color-primary);
+  }
+
+  .comparison-card .card-chart-area {
+    width: 70%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .comparison-card .card-chart-area :global(img) {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    display: block;
+    background-color: #333;
+  }
+
+  /* Testimonial & Stats Section Styles */
+  .testimonial-stats-layout {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+  }
+
+  .testimonial-stats-layout.space-above {
+    margin-top: 100px;
+  }
+
+  .testimonial-image-column {
+    width: 60%;
+    /* position: relative; No longer needed if card is part of the image */
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .main-media-image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* Removed CSS for .testimonial-card, .dream11-logo, .quote, .author-info, .author-image, .author-details, .author-name, .author-title */
+
+  .stats-column {
+    width: 40%;
+    padding-top: 20px;
+  }
+
+  .stats-column h3 {
+    font-family: "Tiempos", serif;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 500;
+    line-height: 1.3;
+    margin-bottom: 16px;
+    color: var(--color-foreground);
+  }
+
+  .stats-subtext {
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    color: var(--color-muted-foreground);
+  }
+
+  .aws-logo {
+    font-weight: bold;
+    color: #FF9900;
+  }
+
+  .stats-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .stats-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 15px;
+    color: var(--color-foreground);
+  }
+
+  .stat-icon {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 1024px) {
+    .cost-comparison-layout,
+    .testimonial-stats-layout {
+      flex-direction: column;
+      gap: 30px;
+    }
+    .cost-comparison-left,
+    .cost-comparison-right,
+    .testimonial-image-column,
+    .stats-column {
+      width: 100%;
+    }
+    /* Removed .testimonial-card responsive styles as it's part of the image now */
+  }
+
+  @media (max-width: 768px) {
+    .comparison-card {
+      flex-direction: column;
+      padding: 20px;
+    }
+    .comparison-card .card-text-content,
+    .comparison-card .card-chart-area {
+      width: 100%;
+    }
+    .cost-comparison-left h2 {
+      font-size: 1.8rem;
+    }
+    .cost-comparison-left .text-block h3 {
+      font-size: 1.1rem;
+    }
+    .stats-column h3 {
+      font-size: 1.5rem;
+    }
   }
 </style>
