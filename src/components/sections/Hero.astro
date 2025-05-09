@@ -167,7 +167,7 @@ import ScrollJack from "../shared/ScrollJack.astro"; // Added for scroll jacking
       heroSection.addEventListener('scroll-jack-step', (e) => {
         const { direction, delta } = e.detail;
         // Increase step size for faster scrolling (changed from 20 to 10)
-        const stepSize = Math.max(2, Math.floor(delta / 10)); 
+        const stepSize = Math.max(2, Math.floor(delta / 1)); 
         
         // Show hero content when scrolling up
         const heroContent = document.querySelector('.hero-content');
