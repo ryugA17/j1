@@ -31,7 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
     targetSection: null,
     nextSection: null,
     animationSteps: 100, // Total animation steps to complete
-    currentStep: 0       // Current animation step
+    currentStep: 0,      // Current animation step
+    hasLeftSection: false, // Track if user has left the section
+    lastProgress: 0,     // Store last animation progress
+    inReEntryMode: false // Flag to handle re-entry animation state
   };
   
   // Get references to important elements
@@ -91,25 +94,130 @@ document.addEventListener('DOMContentLoaded', () => {
       // Smooth scroll to the bottom of the section to create a seamless transition
       smoothScrollTo(targetSection.offsetTop + targetSection.offsetHeight - window.innerHeight, 500);
     });
+
+    // Important: Set up intersection observer to detect entering/leaving the section
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        handleSectionVisibilityChange(entry.isIntersecting);
+      });
+    }, {
+      rootMargin: "0px",
+      threshold: [0.1, 0.5] // Detect when section is 10% or 50% visible
+    });
+    
+    observer.observe(targetSection);
+    
+    // Also keep the scroll event for redundancy
+    window.addEventListener('scroll', () => {
+      const rect = targetSection.getBoundingClientRect();
+      const isVisible = (rect.top < window.innerHeight && rect.bottom > 0);
+      handleSectionVisibilityChange(isVisible);
+    });
   };
+
+  // Handle section visibility changes with cleaner logic
+  function handleSectionVisibilityChange(isVisible) {
+    // If section becomes visible and we previously left it
+    if (isVisible && state.hasLeftSection) {
+      console.log('ScrollJack: Re-entering section, animation progress was:', state.lastProgress);
+      state.hasLeftSection = false;
+      state.inReEntryMode = true;
+      
+      // Reset locked state for re-entry
+      if (state.lastProgress > 0) {
+        state.isScrollLocked = true;
+        // Allow some scrolling if we're very close to the end
+        state.allowScrolling = state.lastProgress > 0.95;
+      }
+      
+      // Force animation to last known state
+      resumeAnimationFromProgress(state.lastProgress);
+      
+      // Force a redraw of animations
+      forceRedrawAnimations();
+      
+      // After a small delay, turn off re-entry mode
+      setTimeout(() => {
+        state.inReEntryMode = false;
+      }, 500);
+    } 
+    // If section is no longer visible and we hadn't already registered leaving
+    else if (!isVisible && !state.hasLeftSection) {
+      state.hasLeftSection = true;
+      state.lastProgress = state.sectionAnimationProgress;
+      console.log('ScrollJack: Leaving section, stored progress:', state.lastProgress);
+    }
+  }
+
+  // Force animations to redraw at current progress
+  function forceRedrawAnimations() {
+    // Get all animations in the section
+    if (window.heroWidgetAnimation) {
+      const frame = state.lastProgress * (window.heroWidgetAnimation.totalFrames || 100);
+      console.log('ScrollJack: Force redrawing hero animation at frame:', frame);
+      window.heroWidgetAnimation.goToAndStop(frame, true);
+    }
+    
+    // Force redraw of circles animation if available
+    const circlesElement = document.querySelector('#circles-animation');
+    if (circlesElement && circlesElement.animation) {
+      const circlesTotalFrames = circlesElement.animation.totalFrames || 100;
+      const circlesTargetFrame = Math.floor(state.lastProgress * circlesTotalFrames);
+      console.log('ScrollJack: Force redrawing circles animation at frame:', circlesTargetFrame);
+      circlesElement.animation.goToFrame(circlesTargetFrame);
+    }
+  }
+
+  // Resume animation from stored progress
+  function resumeAnimationFromProgress(progress) {
+    console.log('ScrollJack: Resuming animation from progress:', progress);
+    state.sectionAnimationProgress = progress;
+    state.currentStep = Math.floor(progress * state.animationSteps);
+    
+    // Dispatch progress event to update animations
+    const progressEvent = new CustomEvent('scroll-jack-progress', {
+      detail: { 
+        progress: state.sectionAnimationProgress,
+        step: state.currentStep,
+        totalSteps: state.animationSteps,
+        isResuming: true // Flag to indicate this is a resume operation
+      }
+    });
+    targetSection.dispatchEvent(progressEvent);
+  }
   
   // Initial setup - lock scrolling
   const initializeScrollJacking = () => {
     document.body.style.overflow = 'hidden';
     console.log('ScrollJack: Scroll locked initially');
+    
+    // Expose crucial methods to window for debugging and external access
+    window.scrollJackAPI = {
+      resumeFrom: resumeAnimationFromProgress,
+      forceRedraw: forceRedrawAnimations,
+      getState: () => ({ ...state })
+    };
   };
   
   // Handle wheel events for desktop
   function handleWheel(e) {
-    if (state.isScrollLocked && !state.allowScrolling) {
+    // Get the current position relative to the target section
+    const rect = targetSection.getBoundingClientRect();
+    const isVisible = (
+      rect.top < window.innerHeight &&
+      rect.bottom > 0
+    );
+    
+    // If section is visible and we should control scrolling
+    if (isVisible && ((state.isScrollLocked && !state.allowScrolling) || state.inReEntryMode)) {
       e.preventDefault();
       
-      // If we're in the middle of the animation, don't trigger again
+      // If we're in the middle of an animation transition, don't trigger again
       if (state.isAnimating) return;
       
       const deltaY = e.deltaY;
       
-      // Forward the wheel event to the animation controller if we're in the target section
+      // Forward the wheel event to the animation controller
       if (deltaY > 0) {
         // Scrolling down in the target section
         const customEvent = new CustomEvent('scroll-jack-step', {
@@ -164,7 +272,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   function handleTouchMove(e) {
-    if (state.isScrollLocked && !state.allowScrolling) {
+    // Get the current position relative to the target section
+    const rect = targetSection.getBoundingClientRect();
+    const isVisible = (
+      rect.top < window.innerHeight &&
+      rect.bottom > 0
+    );
+    
+    // If section is visible and we should control scrolling
+    if (isVisible && ((state.isScrollLocked && !state.allowScrolling) || state.inReEntryMode)) {
       e.preventDefault();
       
       if (state.isAnimating) return;
@@ -225,7 +341,14 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Handle keyboard navigation
   function handleKeyDown(e) {
-    if (state.isScrollLocked && !state.allowScrolling) {
+    // Get the current position relative to the target section
+    const rect = targetSection.getBoundingClientRect();
+    const isVisible = (
+      rect.top < window.innerHeight &&
+      rect.bottom > 0
+    );
+    
+    if (isVisible && ((state.isScrollLocked && !state.allowScrolling) || state.inReEntryMode)) {
       const scrollKeys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space'];
       
       if (scrollKeys.includes(e.code)) {
