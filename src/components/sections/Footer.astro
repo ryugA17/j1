@@ -209,12 +209,18 @@ const footerLinks = {
       var(--color-black),
       var(--color-secondary)
     );
-    border-radius: 5rem 5rem 0 0;
+    border-radius: 8rem 8rem 0 0;
     color: var(--color-white);
     padding: 160px 0 124px 0;
+    position: relative;
+    z-index: 5;
+    margin-top: -250px;
   }
   .logo img {
     width: 300px;
+    background-color: transparent;
+    position: relative;
+    z-index: 6;
   }
   .logo-and-links {
     display: flex;
@@ -282,6 +288,9 @@ const footerLinks = {
   .social-logo img {
     width: 26px;
     height: 26px;
+    background-color: transparent;
+    position: relative;
+    z-index: 6;
   }
   .logos-and-credit {
     display: flex;

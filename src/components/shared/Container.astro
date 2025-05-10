@@ -6,11 +6,11 @@
  * @prop {string} [class] - Optional additional class name(s).
  */
 
-const { as = "section" } = Astro.props;
+const { as = "section", class: className = "" } = Astro.props;
 const Tag = as;
 ---
 
-<Tag class="container">
+<Tag class={`container ${className}`}>
   <slot />
 </Tag>
 
@@ -21,5 +21,6 @@ const Tag = as;
     margin-right: auto;
     padding-left: 2vw;
     padding-right: 2vw;
+    position: relative;
   }
 </style>

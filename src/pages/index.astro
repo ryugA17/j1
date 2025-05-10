@@ -24,16 +24,18 @@ import TimeTovibe from "../components/sections/TimeTovibe.astro";
   <div class="scroll-snap-container">
     <Navbar />
     <Hero />
-    <main style="z-index: 5; position: relative;">
+    <main class="main-content">
       <Container>
         <CloudNavbar />
         <StrongFoundations />
         <WhyUs />
         
         <FlipkartCase />
-        <TrustAndSecurity />
-        <Pricing />
+        <div class="solid-background-sections">
         
+          <TrustAndSecurity />
+          <Pricing />
+        </div>
         
       </Container>
       <YellowSection />
@@ -41,3 +43,18 @@ import TimeTovibe from "../components/sections/TimeTovibe.astro";
     </main>
   </div>
 </Layout>
+
+<style>
+  .main-content {
+    position: relative;
+    z-index: 5; /* On top of Flipkart */
+    background-color: white; /* Add solid background to prevent transparency */
+  }
+  
+  .solid-background-sections {
+    position: relative;
+    z-index: 10; /* Even higher z-index */
+    background-color: var(--color-background, #0D1117); /* Ensure solid background */
+    width: 100%;
+  }
+</style>

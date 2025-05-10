@@ -4,47 +4,58 @@ import { Image } from 'astro:assets';
 import backgroundImage from '../../assets/p1.jpg';
 ---
 
-<section class="flipkart-case">
-  <div class="container">
-    <div class="content">
-      <div class="info-card">
-        <h2 class="company-name">Flipkart</h2>
-        <p class="description">
-          Handled record-breaking traffic during the 2024 Big Billion Days event using Aerospike.
-        </p>
-        
-        <a href="#" class="press-link">
-          Read the press release 
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 1L15 8L8 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M15 8H1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </a>
-        
-        <div class="stats-container">
-          <div class="stat">
-            <h3>300+ development teams</h3>
-            <p>building with Aerospike</p>
-          </div>
+<div class="sticky-background">
+  <section class="flipkart-case">
+    <div class="container">
+      <div class="content">
+        <div class="info-card">
+          <h2 class="company-name">Flipkart</h2>
+          <p class="description">
+            Handled record-breaking traffic during the 2024 Big Billion Days event using Aerospike.
+          </p>
           
-          <div class="stat">
-            <h3>25x traffic surge</h3>
-            <p>for interactive shopping experiences</p>
-          </div>
+          <a href="#" class="press-link">
+            Read the press release 
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 1L15 8L8 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M15 8H1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
           
-          <div class="stat">
-            <h3>96M+</h3>
-            <p>transactions per second</p>
+          <div class="stats-container">
+            <div class="stat">
+              <h3>300+ development teams</h3>
+              <p>building with Aerospike</p>
+            </div>
+            
+            <div class="stat">
+              <h3>25x traffic surge</h3>
+              <p>for interactive shopping experiences</p>
+            </div>
+            
+            <div class="stat">
+              <h3>96M+</h3>
+              <p>transactions per second</p>
+            </div>
           </div>
         </div>
+        
+        <Image src={backgroundImage} alt="Flipkart customer with gift" class="background-image" />
       </div>
-      
-      <Image src={backgroundImage} alt="Flipkart customer with gift" class="background-image" />
     </div>
-  </div>
-</section>
+  </section>
+</div>
 
 <style>
+  .sticky-background {
+    position: sticky;
+    top: 0;
+    z-index: 0; /* Lowest */
+    background-color: white;
+    height: 100vh; /* Limit height to viewport */
+    overflow: hidden; /* Prevent content from flowing outside */
+  }
+
   .flipkart-case {
     padding: 0;
     background-color: var(--color-background, #0D1117);

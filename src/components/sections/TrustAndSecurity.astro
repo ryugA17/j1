@@ -5,62 +5,69 @@ import TrustCard from "../sections-specific/trust-and-security/TrustCard.astro";
 import SecurityCard from "../sections-specific/trust-and-security/SecurityCard.astro";
 ---
 
-<section>
-  <div class="texts animate fade-in">
-    <SectionName>TRUST & SECURITY</SectionName>
-    <SectionHeading
-      >We build it. We run it. We pick up the phone.</SectionHeading
-    >
-  </div>
-  <div class="trust-cards">
-    <div class="animate fade-up">
-      <TrustCard
-        title="Proactive observabiliy"
-        description="Easily integrates to your existing observability tools, includin Datalog and Grafana."
-        imgSrc="/images/Proactive Marketing.png"
-      />
+<div class="main-content">
+  <section>
+    <div class="texts animate fade-in">
+      <SectionName>TRUST & SECURITY</SectionName>
+      <SectionHeading
+        >We build it. We run it. We pick up the phone.</SectionHeading
+      >
     </div>
-    <div class="animate fade-up delay-100">
-      <TrustCard
-        title="World-class globaal support"
-        description="24/7 assistaance from the engineers who built Aerospike."
-        imgSrc="/images/Icon Card.png"
-      />
+    <div class="trust-cards">
+      <div class="animate fade-up">
+        <TrustCard
+          title="Proactive observabiliy"
+          description="Easily integrates to your existing observability tools, includin Datalog and Grafana."
+          imgSrc="/images/Proactive Marketing.png"
+        />
+      </div>
+      <div class="animate fade-up delay-100">
+        <TrustCard
+          title="World-class globaal support"
+          description="24/7 assistaance from the engineers who built Aerospike."
+          imgSrc="/images/Icon Card.png"
+        />
+      </div>
     </div>
-  </div>
-  <div class="security-cards stagger-children animate">
-    <div>
-      <SecurityCard
-        title="SOC2 certified"
-        description="Independently audited . Type II attestation available upon request."
-        imgSrc="/images/lg1.png"
-      />
+    <div class="security-cards stagger-children animate">
+      <div>
+        <SecurityCard
+          title="SOC2 certified"
+          description="Independently audited . Type II attestation available upon request."
+          imgSrc="/images/lg1.png"
+        />
+      </div>
+      <div>
+        <SecurityCard
+          title="VPC isolation & private peering"
+          description="Traffic stays private, with no exposure to the public internet."
+          imgSrc="/images/lg2.png"
+        />
+      </div>
+      <div>
+        <SecurityCard
+          title="Encryption at rest and in transit "
+          description="Encryption is on by default — your data stays protected and in your hands."
+          imgSrc="/images/lg3.png"
+        />
+      </div>
+      <div>
+        <SecurityCard
+          title="Standard 99.95% SLA"
+          description="We stand behind every cluster. Custom SLAs available when you need five nines."
+          imgSrc="/images/lg4.png"
+        />
+      </div>
     </div>
-    <div>
-      <SecurityCard
-        title="VPC isolation & private peering"
-        description="Traffic stays private, with no exposure to the public internet."
-        imgSrc="/images/lg2.png"
-      />
-    </div>
-    <div>
-      <SecurityCard
-        title="Encryption at rest and in transit "
-        description="Encryption is on by default — your data stays protected and in your hands."
-        imgSrc="/images/lg3.png"
-      />
-    </div>
-    <div>
-      <SecurityCard
-        title="Standard 99.95% SLA"
-        description="We stand behind every cluster. Custom SLAs available when you need five nines."
-        imgSrc="/images/lg4.png"
-      />
-    </div>
-  </div>
-</section>
+  </section>
+</div>
 
 <style>
+  .main-content {
+    position: relative;
+    z-index: 5; /* On top of Flipkart */
+  }
+
   section {
     padding: 60px 0;
     max-width: 1200px;

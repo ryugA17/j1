@@ -2,26 +2,44 @@
 import Button from "../shared/Button.astro";
 ---
 
-<section class="yellow-section">
-  <div class="content">
-    <h1>Looking for a co-pilot?</h1>
-    <p>Schedule 20mins with a Aerospike Field Engineer</p>
-    <Button variant="secondary" className="custom-button">Schedule Call</Button>
-  </div>
-</section>
+<div class="sticky-background">
+  <section class="yellow-section">
+    <div class="content">
+      <h1>Looking for a co-pilot?</h1>
+      <p>Schedule 20mins with a Aerospike Field Engineer</p>
+      <Button variant="secondary" className="custom-button">Schedule Call</Button>
+    </div>
+  </section>
+</div>
 
 <style>
+  .sticky-background {
+    position: sticky;
+    top: 0;
+    z-index: 0; /* Lowest */
+    background-color: #F8F413;
+    height: 100vh; /* Limit height to viewport */
+    overflow: hidden; /* Prevent content from flowing outside */
+  }
+  
   .yellow-section {
     background: #F8F413;
-    padding: 250px 0;
+    padding: 250px 0 350px; /* Increased bottom padding to 350px to account for overlap */
+    position: relative;
+    z-index: 1;
   }
+  
   .content {
     text-align: center;
     display: flex;
     flex-direction: column;
     gap: 28px;
     align-items: center;
+    position: relative;
+    z-index: 2;
+    background: #F8F413;
   }
+  
   :global(.custom-button) {
     background-color: #000000 !important;
     color: #ffffff !important;
