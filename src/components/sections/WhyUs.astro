@@ -128,9 +128,9 @@ import OperationsExperience from './OperationsExperience.astro';
             continuous writes—even as terabytes turn into petabytes.
           </p>
           
-          <div class="adtech-client-box animate fade-in delay-200">
+          <div class="adtech-client-box"> 
             <div class="adtech-client-info">
-              <div class="adtech-client-logo-container">
+              <div class="adtech-client-logo-container hide-logo-on-mobile">
                 <Image src={adtechLogoImage} alt="AdTech Partner Logo" class="adtech-client-logo-img" />
               </div>
               <div class="adtech-client-text">
@@ -138,9 +138,7 @@ import OperationsExperience from './OperationsExperience.astro';
               </div>
             </div>
             <div class="adtech-client-arrow">
-              <Image src={blogo} alt="Fintech application showcase" class="fintech-main-image" />
-                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              
+              <Image src={blogo} alt="Arrow icon" class="fintech-main-image" /> 
             </div>
           </div>
         </div>
@@ -197,7 +195,7 @@ import OperationsExperience from './OperationsExperience.astro';
           
           <div class="wayfair-client-box animate fade-in delay-200">
             <div class="wayfair-client-info">
-              <div class="wayfair-client-logo-container">
+              <div class="wayfair-client-logo-container hide-logo-on-mobile">
                 <Image src={wayfairLogoImage} alt="Wayfair Logo" class="wayfair-client-logo-img" />
               </div>
               <div class="wayfair-client-text">
@@ -205,8 +203,7 @@ import OperationsExperience from './OperationsExperience.astro';
               </div>
             </div>
             <div class="wayfair-client-arrow">
-                           <Image src={blogo} alt="Fintech application showcase" class="fintech-main-image" />
-
+                           <Image src={blogo} alt="Arrow icon" class="fintech-main-image" />
             </div>
           </div>
         </div>
@@ -783,6 +780,40 @@ import OperationsExperience from './OperationsExperience.astro';
       width: 100%;
       max-width: 100%;
     }
+
+    /* Wayfair mobile layout: Image on top */
+    .wayfair-showcase-layout {
+      flex-direction: column;
+    }
+    .wayfair-showcase-column { /* Contains image */
+      order: 1;
+    }
+    .wayfair-showcase-left { /* Contains text */
+      order: 2;
+    }
+
+    /* Fintech mobile layout: Image on top */
+    .fintech-showcase-layout {
+      flex-direction: column;
+    }
+    .fintech-image-column { /* Contains image */
+      order: 1;
+    }
+    .fintech-text-column { /* Contains text */
+      order: 2;
+    }
+
+    /* AdTech mobile layout: Image on top */
+    .adtech-showcase-layout {
+      flex-direction: column;
+    }
+    .adtech-image-column { /* Contains image */
+      order: 1;
+    }
+    .adtech-text-column { /* Contains text */
+      order: 2;
+    }
+
     .wayfair-showcase-left {
       gap: 16px;
     }
@@ -807,6 +838,16 @@ import OperationsExperience from './OperationsExperience.astro';
     .adtech-title,
     .adtech-description {
         /* Consider adjusting font sizes for adtech section if needed */
+    }
+
+    /* Specifically hide Wayfair logo container on mobile/tablet */
+    .wayfair-client-box .wayfair-client-info .wayfair-client-logo-container.hide-logo-on-mobile {
+      display: none !important;
+    }
+
+    /* Specifically hide AdTech logo container on mobile/tablet */
+    .adtech-client-box .adtech-client-info .adtech-client-logo-container.hide-logo-on-mobile {
+      display: none !important;
     }
   }
 
@@ -839,6 +880,13 @@ import OperationsExperience from './OperationsExperience.astro';
       font-size: 1.5rem;
     }
 
+    /* Wayfair mobile - already column from 1024px, ensure image order */
+    .wayfair-showcase-right { /* Contains image */
+      order: 1;
+    }
+    .wayfair-showcase-left { /* Contains text */
+      order: 2;
+    }
     .wayfair-case-study-wrapper {
       padding-top: 40px;
       padding-bottom: 80px;
@@ -846,17 +894,22 @@ import OperationsExperience from './OperationsExperience.astro';
       padding-right: 20px;
     }
     .wayfair-client-box {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 16px;
+      /* Reverted to default row layout: removed flex-direction, align-items, gap */
     }
     .wayfair-client-info {
-      width: 100%;
+      /* Removed width: 100% */
     }
     .wayfair-client-arrow {
-      align-self: flex-end;
+      /* Reverted to default vertical alignment: removed align-self: flex-end; */
     }
 
+    /* Fintech mobile - already column from 1024px, ensure image order */
+    .fintech-image-column {
+        order: 1;
+    }
+    .fintech-text-column {
+        order: 2;
+    }
     .fintech-case-study-wrapper {
       padding-top: 40px;
       padding-bottom: 80px;
@@ -870,28 +923,26 @@ import OperationsExperience from './OperationsExperience.astro';
       font-size: 16px;
     }
     .fintech-client-box {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 16px;
+      /* Reverted to default row layout: removed flex-direction, align-items, gap */
     }
     .fintech-client-text {
-        width: 100%;
-        margin-right: 0;
+        /* Removed width: 100% and margin-right: 0 */
     }
     .fintech-client-arrow {
-      align-self: flex-end;
+      /* Reverted to default vertical alignment: removed align-self: flex-end; */
     }
 
-    /* AdTech section adjustments for 768px */
+    /* AdTech mobile - already column from 1024px, ensure image order */
+    .adtech-image-column {
+        order: 1;
+    }
+    .adtech-text-column {
+        order: 2;
+    }
     .adtech-case-study-wrapper {
       padding-top: 40px; padding-bottom: 80px; padding-left: 20px; padding-right: 20px;
     }
-    .adtech-title { font-size: 28px; }
-    .adtech-description { font-size: 16px; }
-    .adtech-client-box {
-      width: 100%;
-      height: auto;
-    }
+    /* AdTech client box should retain its default row layout. If issues persist, specific styles may be needed here. */
 
     .use-cases-heading-block,
     .space-above {
