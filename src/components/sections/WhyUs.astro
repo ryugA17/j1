@@ -15,6 +15,7 @@ import fintechShowcaseImage from '../../assets/g2.jpg';
 import adtechShowcaseImage from '../../assets/g3.jpg'; // New AdTech image
 import adtechLogoImage from '../../assets/b1.png'; // New AdTech logo
 // Removed dream11Logo and amitGardeImage imports as they are part of mediaImage
+import OperationsExperience from './OperationsExperience.astro';
 ---
 
 <section>
@@ -111,6 +112,8 @@ import adtechLogoImage from '../../assets/b1.png'; // New AdTech logo
       <SectionName>USE CASES</SectionName>
       <SectionHeading>Trusted wherever 'good enough' isn't good enough</SectionHeading>
     </div>
+
+    <OperationsExperience />
 
     <!-- New Ad & Marketing Tech Section - Text Left, Image Right -->
     <div class="adtech-case-study-wrapper space-above">
@@ -885,13 +888,10 @@ import adtechLogoImage from '../../assets/b1.png'; // New AdTech logo
     .adtech-title { font-size: 28px; }
     .adtech-description { font-size: 16px; }
     .adtech-client-box {
-      flex-direction: column; align-items: flex-start; gap: 16px;
       width: 100%;
       height: auto;
     }
-    .adtech-client-info { width: 100%; }
-    .adtech-client-arrow { align-self: flex-end; }
-    
+
     .use-cases-heading-block,
     .space-above {
       margin-top: 60px;

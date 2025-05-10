@@ -1,6 +1,7 @@
 ---
 // src/components/sections/OperationsExperience.astro
 // import { Image } from 'astro:assets'; // Not needed if images are in /public
+// import { Fragment } from 'astro:components'; // No longer needed if Fragment usage is removed
 
 // Define the structure for each feature
 interface Feature {
@@ -55,6 +56,47 @@ const features: Feature[] = [
     imageName: "/images/6.png"
   }
 ];
+
+// Content for the new section, adapted from TimeTovibe.astro
+// const timeToVibeCodeSnippet = ` ... `; // No longer needed
+
+interface TimeToVibeValueProp {
+  iconImageName?: string; // Path to icon image
+  title: string;
+  description: string;
+}
+
+interface TimeToVibeColumnDetail {
+  mainTitle: string;
+  props: TimeToVibeValueProp[];
+  isButtonColumn?: boolean;
+}
+
+const timeToVibeColumns: TimeToVibeColumnDetail[] = [
+  {
+    mainTitle: "Your secret weapon for every new project",
+    props: [
+      { title: "No sharding and no surprises", description: "No GC pauses. No jittery latencies. And no shards to rebalance at 2 a.m.", iconImageName: "/images/p1.png" },
+      { title: "The last database you\'ll ever need", description: "With ultra low latency, powerful expressions, and rich data types, suddenly every problem starts to look like a nail. And it\'s hammer time.", iconImageName: "/images/p2.png" }
+    ]
+  },
+  {
+    mainTitle: "Helps simplify distributed systems",
+    props: [
+      { title: "Rip out complexity", description: "Flatten your data stack into one layer for both hot data and reliable long-term storage.", iconImageName: "/images/p3.png" },
+      { title: "Retire home-rolled locks", description: "External locks can cause headaches at scale—replace them with atomic, in-database, distributed transactions.", iconImageName: "/images/p4.png" }
+    ]
+  },
+  {
+    mainTitle: "Native support for high-performance languages",
+    props: [
+      { title: "First-party support for high-performance languages like Go, Rust, Node.js, C#, and Java.", description: "(And everyone\'s favorite esolow one 😉)" }
+    ],
+    isButtonColumn: true
+  }
+];
+
+const timeToVibeIconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 10C4 8.89543 4.89543 8 6 8H7V7C7 4.79086 8.79086 3 11 3H13C15.2091 3 17 4.79086 17 7V8H18C19.1046 8 20 8.89543 20 10V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V10ZM6 10V18H18V10H6ZM15 8V7C15 5.89543 14.1046 5 13 5H11C9.89543 5 9 5.89543 9 7V8H15Z" fill="currentColor"/></svg>`;
 
 ---
 
@@ -208,7 +250,7 @@ const features: Feature[] = [
     display: flex;
     gap: 50px;
     align-items: flex-start;
-    position: sticky;
+    position: relative;
     top: 120px;
     z-index: 10;
   }
@@ -216,7 +258,7 @@ const features: Feature[] = [
   .nav-column { /* Desktop Nav Column */
     width: 25%;
     flex-shrink: 0;
-    position: sticky;
+    position: relative;
     top: 0px;
   }
 
@@ -411,6 +453,290 @@ const features: Feature[] = [
   }
 
   .hidden {
+    display: none !important;
+  }
+</style> 
+
+<div class="grid-accent-section">
+  <div class="ops-content-wrapper">
+    <p class="ops-subtitle">DEVELOPERS & ARCHITECTS</p>
+    <h2 class="ops-main-heading">Accelerated time-to-vibe</h2>
+
+    <img src="/images/Code Panel.png" alt="Code Panel Example" class="ops-code-panel-image" />
+
+    <div class="ops-value-props-grid">
+      {timeToVibeColumns.map(column => (
+        <div class="ops-value-prop-column">
+          <h3>{column.mainTitle}</h3>
+          {column.props.map(prop => (
+            <div class="ops-prop-item">
+              <div class="ops-prop-icon">
+                {prop.iconImageName ? (
+                  <img src={prop.iconImageName} alt={`${prop.title} icon`} />
+                ) : (
+                  <!-- Default or empty if no image, current behavior is empty for 3rd col prop -->
+                  <span class="ops-no-icon-placeholder"></span>
+                )}
+              </div>
+              <div class="ops-prop-text">
+                <h4>{prop.title}</h4>
+                <p>{prop.description}</p>
+              </div>
+            </div>
+          ))}
+          {column.isButtonColumn && (
+            <button class="ops-start-building-button">
+              
+              <img src="/images/p5.png" alt="Build icon" class="ops-button-icon" />
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .grid-accent-section {
+    width: 1439px;
+    height: 1383px; /* Fixed height as requested */
+    padding-top: 120px;
+    padding-right: 59px;
+    padding-bottom: 200px;
+    padding-left: 59px;
+    background-image: url('/images/grid-effect.png'), linear-gradient(177.41deg, #0D1B32 2.11%, #000000 92.51%);
+    background-repeat: no-repeat, no-repeat;
+    background-position: center center, center center;
+    background-size: cover, cover;
+    color: #ffffff;
+    font-family: "Helvetica Now Display", sans-serif;
+    margin: 60px auto; /* Centering the section if viewport is wider */
+    position: relative;
+    display: flex; /* For centering content-wrapper */
+    justify-content: center;
+    overflow: hidden; /* Prevent content spill with fixed height */
+  }
+
+  
+
+  .ops-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1100px; /* Max width for the content */
+    padding: 0 20px; /* Padding inside the content area */
+    box-sizing: border-box;
+    z-index: 1; /* Ensure content is above pseudo-elements */
+  }
+
+  .ops-subtitle {
+    font-size: 0.875rem; /* 14px */
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    margin-bottom: 16px; /* Space below subtitle */
+    opacity: 0.8;
+    text-align: center;
+  }
+
+  .ops-main-heading {
+    font-size: clamp(2.5rem, 5vw, 3.5rem); /* Responsive font size */
+    font-weight: 500;
+    margin-bottom: 40px; /* Space below main heading */
+    text-align: center;
+  }
+
+  .ops-code-panel-image {
+    width: 764px;
+    height: 524px;
+    border-radius: 14px;
+    object-fit: cover; /* or contain, depending on how image should scale */
+    margin-bottom: 60px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+
+  .ops-value-props-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px; 
+    width: 100%;
+    margin-top: 20px; 
+    align-items: stretch; /* Make columns in a row equal height */
+  }
+
+  .ops-value-prop-column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px; 
+  }
+
+  .ops-value-prop-column > h3 {
+    font-size: 1.25rem; /* 20px */
+    font-weight: 500;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 8px;
+    border-bottom: 1px dotted rgba(255,255,255,0.2);
+    padding-bottom: 16px;
+  }
+
+  .ops-prop-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .ops-prop-icon {
+    flex-shrink: 0;
+    width: 36px; /* Adjust as needed based on actual image size / design */
+    height: 36px; /* Adjust as needed */
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* background-color: rgba(255,255,255,0.05); /* Removed, as image will provide visual */
+  }
+  .ops-prop-icon img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Or cover, depending on image aspect ratio */
+  }
+  .ops-no-icon-placeholder {
+    /* If you want a visible placeholder for props without images */
+    /* width: 24px; height: 24px; background-color: rgba(255,255,255,0.1); border-radius: 4px; */
+  }
+  
+  .ops-prop-text h4 {
+    font-size: 1rem; /* 16px */
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #ffffff;
+  }
+
+  .ops-prop-text p {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .ops-start-building-button {
+    /* Change background to transparent to show the image's own background */
+    background-color: transparent;
+    /* Text color not needed for image-only button */
+    /* color: #051028; */
+    border: none;
+    /* Keep border-radius in case it impacts the rendering */
+    border-radius: 99px;
+    /* Adjust padding to minimum around the image */
+    padding: 0;
+    /* Font properties not needed for image-only button */
+    /* font-family: "Helvetica Now Display", sans-serif; */
+    /* font-size: 0.9rem; */
+    /* font-weight: 500; */
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* No gap needed for single image */
+    /* gap: 8px; */
+    margin-top: auto;
+    align-self: flex-start;
+  }
+  .ops-start-building-button:hover {
+    /* No background color change on hover for transparent button */
+    /* background-color: #CBD5E1; */
+    transform: translateY(-1px);
+  }
+  
+  .ops-button-icon {
+    /* Let the image size be defined by the image file itself */
+    width: auto;
+    height: auto;
+    /* But ensure it doesn't get too large */
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 1440px) { /* Matches fixed width, adjust for fluidity */
+    .grid-accent-section {
+      width: 100%;
+      height: auto; /* Allow height to adjust based on content */
+      min-height: 100vh; /* Ensure it takes at least viewport height */
+      padding: 80px 30px 100px; /* Adjusted padding */
+    }
+     .grid-accent-section::before {
+      top: 40px; left: 15px; right: 15px; bottom: 50px;
+    }
+    .ops-code-panel-image {
+      width: 90%; /* Make image responsive */
+      max-width: 764px; /* But not larger than original */
+      height: auto; /* Adjust height proportionally */
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .ops-main-heading {
+        font-size: clamp(2rem, 4vw, 3rem);
+        margin-bottom: 30px;
+    }
+    .ops-code-panel-image {
+        margin-bottom: 50px;
+    }
+    .ops-value-props-grid {
+      grid-template-columns: 1fr; /* Stack columns */
+      gap: 50px; 
+    }
+    .ops-value-prop-column > h3 {
+      text-align: center;
+    }
+    .ops-start-building-button {
+      align-self: center; /* Center button when columns stack */
+    }
+  }
+
+  @media (max-width: 768px) {
+    .grid-accent-section {
+      padding-top: 60px;
+      padding-left: 20px;
+      padding-right: 20px;
+      padding-bottom: 60px;
+    }
+     .grid-accent-section::before {
+        top: 20px; left: 10px; right: 10px; bottom: 30px;
+    }
+    .ops-subtitle {
+        font-size: 0.8rem;
+        margin-bottom: 12px;
+    }
+    .ops-main-heading {
+        font-size: clamp(1.8rem, 5vw, 2.5rem);
+        margin-bottom: 24px;
+    }
+    .ops-code-panel-image {
+        width: 100%;
+        margin-bottom: 40px;
+    }
+    .ops-value-props-grid {
+      gap: 40px;
+    }
+     .ops-value-prop-column > h3 {
+        font-size: 1.1rem;
+    }
+    .ops-prop-text h4 {
+        font-size: 0.95rem;
+    }
+    .ops-prop-text p {
+        font-size: 0.825rem;
+    }
+    .ops-start-building-button {
+        padding: 10px 20px;
+        font-size: 0.85rem;
+    }
+  }
+
+  .hidden { /* If this was from the old section and not used by the first one */
     display: none !important;
   }
 </style> 
