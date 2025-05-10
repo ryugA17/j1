@@ -28,4 +28,33 @@ import Button from "../shared/Button.astro";
     font-weight: bold;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
+  
+  /* Mobile Improvements Only */
+  @media (max-width: 768px) {
+    .yellow-section {
+      padding: 120px 0;
+    }
+    .content {
+      gap: 20px;
+      padding: 0 20px;
+    }
+    h1 {
+      font-size: 32px;
+    }
+    p {
+      font-size: 16px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .yellow-section {
+      padding: 80px 0;
+    }
+    .content {
+      gap: 16px;
+    }
+    h1 {
+      font-size: 28px;
+    }
+  }
 </style>

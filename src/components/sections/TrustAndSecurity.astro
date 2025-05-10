@@ -16,34 +16,34 @@ import SecurityCard from "../sections-specific/trust-and-security/SecurityCard.a
     <TrustCard
       title="Proactive observabiliy"
       description="Easily integrates to your existing observability tools, includin Datalog and Grafana."
-      imgSrc="/images/trust.png"
+      imgSrc="/images/Proactive Marketing.png"
     />
     <TrustCard
       title="World-class globaal support"
       description="24/7 assistaance from the engineers who built Aerospike."
-      imgSrc="/images/support.png"
+      imgSrc="/images/Icon Card.png"
     />
   </div>
   <div class="security-cards">
     <SecurityCard
       title="SOC2 certified"
       description="Independently audited . Type II attestation available upon request."
-      imgSrc="/images/security-1.svg"
+      imgSrc="/images/lg1.png"
     />
     <SecurityCard
       title="VPC isolation & private peering"
       description="Traffic stays private, with no exposure to the public internet."
-      imgSrc="/images/security-2.svg"
+      imgSrc="/images/lg2.png"
     />
     <SecurityCard
       title="Encryption at rest and in transit "
       description="Encryption is on by default — your data stays protected and in your hands."
-      imgSrc="/images/security-3.svg"
+      imgSrc="/images/lg3.png"
     />
     <SecurityCard
       title="Standard 99.95% SLA"
       description="We stand behind every cluster. Custom SLAs available when you need five nines."
-      imgSrc="/images/security-4.svg"
+      imgSrc="/images/lg4.png"
     />
   </div>
 </section>
@@ -51,6 +51,8 @@ import SecurityCard from "../sections-specific/trust-and-security/SecurityCard.a
 <style>
   section {
     padding: 60px 0;
+    max-width: 1200px;
+    margin: 0 auto;
   }
   .security-cards {
     display: grid;
@@ -74,9 +76,33 @@ import SecurityCard from "../sections-specific/trust-and-security/SecurityCard.a
   @media (max-width: 1024px) {
     .trust-cards {
       grid-template-columns: 1fr;
+      gap: 40px;
+      margin-top: 60px;
     }
     .security-cards {
       grid-template-columns: 1fr;
+      gap: 20px;
+      margin-top: 60px;
+    }
+    section {
+      padding: 40px 20px;
+    }
+    .texts {
+      gap: 16px;
+      margin-top: 24px;
+    }
+  }
+  @media (max-width: 768px) {
+    section {
+      padding: 30px 16px;
+    }
+    .trust-cards {
+      margin-top: 40px;
+      gap: 30px;
+    }
+    .security-cards {
+      margin-top: 40px;
+      gap: 16px;
     }
   }
 </style>

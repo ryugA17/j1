@@ -23,7 +23,7 @@ import FoundationCard from "../sections-specific/strong-foundations/FoundationCa
       <FoundationCard
         title="Patented cloud costs reduction"
         description="Engineered from the silicon up to reduce your cloud—often by up to 80%."
-        bottomText="Learn more about Aerospike’s patented Hybrid Memory Architecture ↗"
+        bottomText="Learn more about Aerospike's patented Hybrid Memory Architecture ↗"
         imageSrc="foundation-card-image-2.png"
         variant="primary"
       />
@@ -40,6 +40,8 @@ import FoundationCard from "../sections-specific/strong-foundations/FoundationCa
 <style>
   section {
     padding: 60px 0 0 0;
+    max-width: 1200px;
+    margin: 0 auto;
   }
 
   .texts {
@@ -58,9 +60,30 @@ import FoundationCard from "../sections-specific/strong-foundations/FoundationCa
     margin-left: auto;
     margin-right: auto;
   }
-  @media (max-width: 768px) {
+  
+  @media (max-width: 1024px) {
+    .texts {
+      margin-top: 100px;
+      gap: 16px;
+    }
     .cards {
       grid-template-columns: 1fr;
+      gap: 40px;
+      margin-top: 60px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    section {
+      padding: 40px 16px 0 16px;
+    }
+    .texts {
+      margin-top: 60px;
+      gap: 12px;
+    }
+    .cards {
+      gap: 30px;
+      margin-top: 40px;
     }
   }
 </style>

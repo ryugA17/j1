@@ -17,6 +17,17 @@ const { description, title, imgSrc } = Astro.props;
     background: var(--color-accent);
     border-radius: 20px;
     padding: 50px 30px;
+    height: 100%;
+    transition: transform 0.3s ease;
+  }
+  .image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .image img {
+    max-width: 60px;
+    height: auto;
   }
   .texts {
     display: flex;
@@ -33,5 +44,25 @@ const { description, title, imgSrc } = Astro.props;
     font-size: 14px;
     color: var(--color-muted-foreground);
     margin-top: 10px;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 768px) {
+    .card {
+      padding: 30px 20px;
+    }
+    .image img {
+      max-width: 50px;
+    }
+    .texts {
+      margin-top: 25px;
+    }
+    .title {
+      font-size: 16px;
+    }
+    p {
+      font-size: 13px;
+      margin-top: 6px;
+    }
   }
 </style>

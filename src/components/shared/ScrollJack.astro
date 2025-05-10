@@ -303,6 +303,10 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Show a scroll indicator after animation completes
   function showScrollDownIndicator() {
+    // Function disabled to remove "SCROLL TO CONTINUE" indicator
+    return; // Early return to prevent indicator creation
+    
+    /* Original implementation commented out
     // Check if an indicator already exists
     if (document.querySelector('.scroll-down-indicator')) return;
     
@@ -370,6 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     window.addEventListener('scroll', removeScrollIndicator);
+    */
   }
   
   // Smooth scroll to a position

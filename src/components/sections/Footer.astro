@@ -203,7 +203,15 @@ const footerLinks = {
 </footer>
 
 <style>
-
+  .footer {
+    background: linear-gradient(
+      to bottom,
+      var(--color-black),
+      var(--color-secondary)
+    );
+    border-radius: 5rem 5rem 0 0;
+    color: var(--color-white);
+    padding: 160px 0 124px 0;
   }
   .logo img {
     width: 300px;
@@ -227,12 +235,20 @@ const footerLinks = {
     display: flex;
     flex-direction: column;
     gap: 18px;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
   }
   ul li {
     color: var(--color-muted);
     max-width: 150px;
   }
-  ul li:hover {
+  ul li a {
+    color: var(--color-muted);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  ul li a:hover {
     color: var(--color-white);
   }
   .footer-links {
@@ -245,16 +261,6 @@ const footerLinks = {
 
   .item {
     color: var(--color-muted);
-  }
-  .footer {
-    background: linear-gradient(
-      to bottom,
-      var(--color-black),
-      var(--color-secondary)
-    );
-    border-radius: 5rem 5rem 0 0;
-    color: var(--color-white);
-    padding: 160px 0 124px 0;
   }
 
   hr {
@@ -285,7 +291,7 @@ const footerLinks = {
     flex-wrap: wrap;
     gap: 50px;
   }
-    @media (max-width: 1024px) {
+  @media (max-width: 1024px) {
     .logo-and-links {
       flex-direction: column;
       gap: 50px;
@@ -293,10 +299,55 @@ const footerLinks = {
     .footer-links {
       flex-wrap: wrap;
     }
+    
+    /* Mobile improvements */
+    .footer-links > div {
+      min-width: 200px;
+    }
+    
+    .logos-and-credit {
+      flex-direction: column;
+      gap: 20px;
+      align-items: flex-start;
+    }
+  }
+
+  @media (max-width: 768px) {
     .footer {
       border-radius: 2rem 2rem 0 0;
-      font-size: 14px;
+      padding: 80px 0 80px 0;
     }
-
+    
+    /* Mobile improvements */
+    .logo img {
+      width: 200px;
+    }
+    
+    .footer-links {
+      flex-direction: column;
+      gap: 40px;
+    }
+    
+    .products-and-integrations {
+      gap: 40px;
+    }
+    
+    .section-title {
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+    
+    ul {
+      gap: 12px;
+    }
+    
+    hr {
+      margin: 80px 0 24px 0;
+    }
+    
+    .logos {
+      flex-wrap: wrap;
+      gap: 15px;
+    }
   }
 </style>

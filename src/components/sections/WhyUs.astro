@@ -233,6 +233,10 @@ import adtechLogoImage from '../../assets/b1.png'; // New AdTech logo
     margin-bottom: 60px;
   }
 
+  .use-cases-heading-block {
+    margin-top: 120px;
+  }
+
   .cost-comparison-layout {
     display: flex;
     gap: 40px;
@@ -352,8 +356,6 @@ import adtechLogoImage from '../../assets/b1.png'; // New AdTech logo
     display: block;
   }
 
-  /* Removed CSS for .testimonial-card, .dream11-logo, .quote, .author-info, .author-image, .author-details, .author-name, .author-title */
-
   .stats-column {
     width: 40%;
     padding-top: 20px;
@@ -401,134 +403,6 @@ import adtechLogoImage from '../../assets/b1.png'; // New AdTech logo
     width: 30px;
     height: 30px;
     flex-shrink: 0;
-  }
-
-  @media (max-width: 1024px) {
-    .cost-comparison-layout,
-    .testimonial-stats-layout,
-    .adtech-case-study-wrapper .adtech-showcase-layout,
-    .fintech-case-study-wrapper .fintech-showcase-layout,
-    .wayfair-case-study-wrapper .wayfair-showcase-layout {
-      flex-direction: column;
-      gap: 30px;
-      height: auto;
-      align-items: stretch;
-    }
-    .cost-comparison-left,
-    .cost-comparison-right,
-    .testimonial-image-column,
-    .stats-column,
-    .adtech-text-column,
-    .adtech-image-column,
-    .fintech-image-column,
-    .fintech-text-column,
-    .wayfair-showcase-left, 
-    .wayfair-showcase-right {
-      width: 100%;
-      max-width: 100%;
-    }
-    .wayfair-showcase-left {
-      gap: 16px;
-    }
-    .wayfair-image-container {
-        width: 100%;
-        max-width: 763px;
-        margin: 0 auto;
-        height: auto;
-        aspect-ratio: 763 / 410;
-    }
-    .wayfair-title {
-        font-size: 28px;
-    }
-    .wayfair-description {
-        font-size: 16px;
-        margin-bottom: 24px;
-    }
-    .fintech-title,
-    .fintech-description {
-        /* Consider adjusting font sizes for fintech section if needed at this breakpoint */
-    }
-    .adtech-title,
-    .adtech-description {
-        /* Consider adjusting font sizes for adtech section if needed */
-    }
-  }
-
-  @media (max-width: 768px) {
-    .comparison-card {
-      flex-direction: column;
-      padding: 20px;
-    }
-    .comparison-card .card-text-content,
-    .comparison-card .card-chart-area {
-      width: 100%;
-    }
-    .cost-comparison-left h2 {
-      font-size: 1.8rem;
-    }
-    .cost-comparison-left .text-block h3 {
-      font-size: 1.1rem;
-    }
-    .stats-column h3 {
-      font-size: 1.5rem;
-    }
-
-    .wayfair-case-study-wrapper {
-      padding-top: 40px;
-      padding-bottom: 80px;
-      padding-left: 20px;
-      padding-right: 20px;
-    }
-    .wayfair-client-box {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 16px;
-    }
-    .wayfair-client-info {
-      width: 100%;
-    }
-    .wayfair-client-arrow {
-      align-self: flex-end;
-    }
-
-    .fintech-case-study-wrapper {
-      padding-top: 40px;
-      padding-bottom: 80px;
-      padding-left: 20px;
-      padding-right: 20px;
-    }
-    .fintech-title {
-      font-size: 28px; 
-    }
-    .fintech-description {
-      font-size: 16px;
-    }
-    .fintech-client-box {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 16px;
-    }
-    .fintech-client-text {
-        width: 100%;
-        margin-right: 0;
-    }
-    .fintech-client-arrow {
-      align-self: flex-end;
-    }
-
-    /* AdTech section adjustments for 768px */
-    .adtech-case-study-wrapper {
-      padding-top: 40px; padding-bottom: 80px; padding-left: 20px; padding-right: 20px;
-    }
-    .adtech-title { font-size: 28px; }
-    .adtech-description { font-size: 16px; }
-    .adtech-client-box {
-      flex-direction: column; align-items: flex-start; gap: 16px;
-      width: 100%;
-      height: auto;
-    }
-    .adtech-client-info { width: 100%; }
-    .adtech-client-arrow { align-self: flex-end; }
   }
 
   /* New Wayfair Showcase Section Styles - Revised */
@@ -610,7 +484,7 @@ import adtechLogoImage from '../../assets/b1.png'; // New AdTech logo
     align-items: center;
     gap: 16px;
   }
-  
+
   .wayfair-client-logo-container {
     width: 100px;
     flex-shrink: 0;
@@ -659,46 +533,12 @@ import adtechLogoImage from '../../assets/b1.png'; // New AdTech logo
     border-radius: 14px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   }
-  
+
   .wayfair-main-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-  }
-
-  @media (max-width: 1440px) {
-    .wayfair-case-study-wrapper {
-        /* Adjust padding for smaller screens if needed, e.g., padding-left/right: 30px */
-    }
-    .wayfair-showcase-layout {
-        max-width: 100%;
-        /* height: auto; */
-        /* flex-direction: column; */
-        /* gap: 40px; */
-    }
-    .wayfair-showcase-left, 
-    .wayfair-showcase-right {
-      width: 100%;
-      max-width: 100%;
-    }
-    .wayfair-showcase-left {
-      gap: 16px;
-    }
-    .wayfair-image-container {
-        width: 100%;
-        max-width: 763px;
-        margin: 0 auto;
-        height: auto;
-        aspect-ratio: 763 / 410;
-    }
-    .wayfair-title {
-        font-size: 28px;
-    }
-    .wayfair-description {
-        font-size: 16px;
-        margin-bottom: 24px;
-    }
   }
 
   /* New Fintech Showcase Section Styles */
@@ -762,7 +602,7 @@ import adtechLogoImage from '../../assets/b1.png'; // New AdTech logo
     color: #888;
     margin-bottom: 12px;
   }
-  
+
   .fintech-title {
     font-family: "Helvetica Now Display", sans-serif;
     font-size: 36px;
@@ -771,14 +611,14 @@ import adtechLogoImage from '../../assets/b1.png'; // New AdTech logo
     margin-bottom: 16px;
     line-height: 1.2;
   }
-  
+
   .fintech-description {
     font-size: 18px;
     line-height: 1.5;
     color: #555;
     margin-bottom: 32px;
   }
-  
+
   .fintech-client-box { /* Adapted from .wayfair-client-box */
     display: flex;
     align-items: center;
@@ -796,7 +636,7 @@ import adtechLogoImage from '../../assets/b1.png'; // New AdTech logo
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
   }
-  
+
   /* .fintech-client-info was here, removed as direct children are now text and arrow */
   
   .fintech-client-text { /* Text now a direct child of client-box */
@@ -819,7 +659,7 @@ import adtechLogoImage from '../../assets/b1.png'; // New AdTech logo
     transition: background-color 0.3s ease;
     flex-shrink: 0;
   }
-  
+
   .fintech-client-box:hover .fintech-client-arrow {
     background-color: #000; /* Example hover, can be themed */
   }
@@ -912,5 +752,149 @@ import adtechLogoImage from '../../assets/b1.png'; // New AdTech logo
   .use-cases-heading-block { /* New class for specific margin control */
     margin-top: 100px;  /* To create a 100px gap above */
     margin-bottom: 0px;   /* To make gap below (to next wrapper's margin-top) also 100px */
+  }
+
+  /* Mobile specific styles - only change these */
+  @media (max-width: 1024px) {
+    .cost-comparison-layout,
+    .testimonial-stats-layout,
+    .adtech-case-study-wrapper .adtech-showcase-layout,
+    .fintech-case-study-wrapper .fintech-showcase-layout,
+    .wayfair-case-study-wrapper .wayfair-showcase-layout {
+      flex-direction: column;
+      gap: 30px;
+      height: auto;
+      align-items: stretch;
+    }
+    .cost-comparison-left,
+    .cost-comparison-right,
+    .testimonial-image-column,
+    .stats-column,
+    .adtech-text-column,
+    .adtech-image-column,
+    .fintech-image-column,
+    .fintech-text-column,
+    .wayfair-showcase-left, 
+    .wayfair-showcase-right {
+      width: 100%;
+      max-width: 100%;
+    }
+    .wayfair-showcase-left {
+      gap: 16px;
+    }
+    .wayfair-image-container {
+        width: 100%;
+        max-width: 763px;
+        margin: 0 auto;
+        height: auto;
+        aspect-ratio: 763 / 410;
+    }
+    .wayfair-title {
+        font-size: 28px;
+    }
+    .wayfair-description {
+        font-size: 16px;
+        margin-bottom: 24px;
+    }
+    .fintech-title,
+    .fintech-description {
+        /* Consider adjusting font sizes for fintech section if needed at this breakpoint */
+    }
+    .adtech-title,
+    .adtech-description {
+        /* Consider adjusting font sizes for adtech section if needed */
+    }
+  }
+
+  @media (max-width: 768px) {
+    section {
+      padding: 40px 0;
+    }
+    
+    .texts {
+      margin-top: 20px;
+      margin-bottom: 40px;
+      gap: 12px;
+    }
+    
+    .comparison-card {
+      flex-direction: column;
+      padding: 20px;
+    }
+    .comparison-card .card-text-content,
+    .comparison-card .card-chart-area {
+      width: 100%;
+    }
+    .cost-comparison-left h2 {
+      font-size: 1.8rem;
+    }
+    .cost-comparison-left .text-block h3 {
+      font-size: 1.1rem;
+    }
+    .stats-column h3 {
+      font-size: 1.5rem;
+    }
+
+    .wayfair-case-study-wrapper {
+      padding-top: 40px;
+      padding-bottom: 80px;
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+    .wayfair-client-box {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .wayfair-client-info {
+      width: 100%;
+    }
+    .wayfair-client-arrow {
+      align-self: flex-end;
+    }
+
+    .fintech-case-study-wrapper {
+      padding-top: 40px;
+      padding-bottom: 80px;
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+    .fintech-title {
+      font-size: 28px; 
+    }
+    .fintech-description {
+      font-size: 16px;
+    }
+    .fintech-client-box {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .fintech-client-text {
+        width: 100%;
+        margin-right: 0;
+    }
+    .fintech-client-arrow {
+      align-self: flex-end;
+    }
+
+    /* AdTech section adjustments for 768px */
+    .adtech-case-study-wrapper {
+      padding-top: 40px; padding-bottom: 80px; padding-left: 20px; padding-right: 20px;
+    }
+    .adtech-title { font-size: 28px; }
+    .adtech-description { font-size: 16px; }
+    .adtech-client-box {
+      flex-direction: column; align-items: flex-start; gap: 16px;
+      width: 100%;
+      height: auto;
+    }
+    .adtech-client-info { width: 100%; }
+    .adtech-client-arrow { align-self: flex-end; }
+    
+    .use-cases-heading-block,
+    .space-above {
+      margin-top: 60px;
+    }
   }
 </style>

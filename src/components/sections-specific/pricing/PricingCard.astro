@@ -118,6 +118,62 @@ const { title, sizeIndicator, price, description, specifications } = Astro.props
     text-align: right;
   }
 
+  /* Mobile responsive improvements */
+  @media (max-width: 1024px) {
+    .pricing-card-new {
+      width: 100%;
+      min-height: 500px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .pricing-card-new {
+      padding: 25px 20px;
+      min-height: auto;
+    }
+
+    .card-header-new {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .title-new {
+      font-size: 24px;
+    }
+
+    .price-new {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .spec-item-new {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
+      padding: 12px 0;
+    }
+
+    .spec-value-new {
+      text-align: left;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .pricing-card-new {
+      padding: 20px 15px;
+    }
+    
+    .description-new {
+      font-size: 14px;
+    }
+    
+    .spec-item-new {
+      padding: 10px 0;
+    }
+  }
+
   /* Remove old styles that are no longer needed */
   /* .pricing-card, .popular, .popular-badge, .card-image, 
      .background-image, .card-content, .card-header, .description, 
