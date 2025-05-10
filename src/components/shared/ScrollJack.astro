@@ -22,21 +22,23 @@ document.addEventListener('DOMContentLoaded', () => {
   // Core state management
   const state = {
     isScrollLocked: true,
-    isAnimating: false,
-    isAnimationComplete: false,
+    isAnimating: false, // Currently processing a scroll-jack step for forward animation
+    isAnimationComplete: false, // Lottie has reported completion (internal)
     initialScrollY: 0,
-    allowScrolling: false,
-    completedSections: new Set(),
-    sectionAnimationProgress: 0,
+    allowScrolling: false, // General flag for scroll release
+    sectionAnimationProgress: 0, // Current progress of the animation (0 to 1)
     targetSection: null,
-    nextSection: null,
-    animationSteps: 100, // Total animation steps to complete
-    currentStep: 0,      // Current animation step
-    hasLeftSection: false, // Track if user has left the section
-    lastProgress: 0,     // Store last animation progress
-    inReEntryMode: false // Flag to handle re-entry animation state
+    animationSteps: 100, // Total animation steps for forward scroll-jacking
+    currentStep: 0,      // Current step in forward scroll-jacking (0 to animationSteps)
+    forwardCompleted: false, // Flag: initial forward scroll-jack animation sequence has finished
+    reverseMode: false,   // Flag: user is scrolling back up into the section for reverse animation
   };
   
+  let scrollY_at_forward_anim_end = null; // Y scroll position when forward animation sequence concludes
+  let scrollY_at_reverse_mode_start = 0; // Y scroll position when reverseMode is triggered
+  const REVERSE_ANIM_SCROLL_RANGE = window.innerHeight * 0.8; // Scroll distance to play full reverse animation (80vh)
+  const SCROLL_ENTRY_BUFFER = 10; // **REDUCED BUFFER**
+
   // Get references to important elements
   const targetSection = document.getElementById(targetSectionId);
   if (!targetSection) {
@@ -49,529 +51,245 @@ document.addEventListener('DOMContentLoaded', () => {
   
   console.log(`ScrollJack: Initialized for section #${targetSectionId}`);
   
-  // Find the next section after our target
-  const findNextSection = () => {
-    const allSections = Array.from(document.querySelectorAll('section'));
-    const targetIndex = allSections.indexOf(targetSection);
-    
-    if (targetIndex !== -1 && targetIndex < allSections.length - 1) {
-      state.nextSection = allSections[targetIndex + 1];
-      console.log(`ScrollJack: Next section found: #${state.nextSection.id}`);
-    } else {
-      console.log('ScrollJack: This appears to be the last section');
-    }
-  };
-  
-  findNextSection();
-  
   // Main event listeners
   const setupEventListeners = () => {
-    // We need to intercept wheel, touch, and keyboard events
     window.addEventListener('wheel', handleWheel, { passive: false });
     window.addEventListener('touchstart', handleTouchStart, { passive: true });
     window.addEventListener('touchmove', handleTouchMove, { passive: false });
     window.addEventListener('keydown', handleKeyDown, { passive: false });
+    document.addEventListener('lottie-hero-animation-complete', handleLottieAnimationComplete);
     
-    // Listen for the Lottie animation completion event
-    document.addEventListener('lottie-hero-animation-complete', handleAnimationComplete);
-    
-    // Allow scrolling once the entire hero animation is complete
     targetSection.addEventListener('animation-complete', () => {
-      console.log('ScrollJack: Section animation complete event received');
+      console.log('ScrollJack: Forward scroll-jack sequence complete.');
       state.allowScrolling = true;
-      state.isScrollLocked = false;
-      
-      // Only add this class once the animation is complete
+      state.isScrollLocked = false; 
+      state.forwardCompleted = true;
       targetSection.classList.add('animation-completed');
-      
-      // Show a scroll indicator
-      showScrollDownIndicator();
-      
-      // Remove constraints
       document.body.style.overflow = '';
       document.body.style.height = '';
       
-      // Smooth scroll to the bottom of the section to create a seamless transition
-      smoothScrollTo(targetSection.offsetTop + targetSection.offsetHeight - window.innerHeight, 500);
+      scrollY_at_forward_anim_end = targetSection.offsetTop + targetSection.offsetHeight;
+      console.log(`ScrollJack: scrollY_at_forward_anim_end set to: ${scrollY_at_forward_anim_end} (Section offsetTop: ${targetSection.offsetTop}, section offsetHeight: ${targetSection.offsetHeight})`);
+      
+      smoothScrollTo(scrollY_at_forward_anim_end + 30, 300); // **ADJUSTED SCROLL PAST AMOUNT**
     });
 
-    // Important: Set up intersection observer to detect entering/leaving the section
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        handleSectionVisibilityChange(entry.isIntersecting);
-      });
-    }, {
-      rootMargin: "0px",
-      threshold: [0.1, 0.5] // Detect when section is 10% or 50% visible
-    });
-    
-    observer.observe(targetSection);
-    
-    // Also keep the scroll event for redundancy
-    window.addEventListener('scroll', () => {
-      const rect = targetSection.getBoundingClientRect();
-      const isVisible = (rect.top < window.innerHeight && rect.bottom > 0);
-      handleSectionVisibilityChange(isVisible);
-    });
+    window.addEventListener('scroll', handleReverseScrollLogic, { passive: true }); 
   };
+  
+  function handleReverseScrollLogic() {
+    // Ensure this log is active for debugging:
+    // console.log(`ScrollJack [ReverseDebug Pre-Guard]: forwardCompleted: ${state.forwardCompleted}, scrollY_at_forward_anim_end: ${scrollY_at_forward_anim_end}`);
+    if (!state.forwardCompleted || scrollY_at_forward_anim_end === null) {
+      return;
+    }
 
-  // Handle section visibility changes with cleaner logic
-  function handleSectionVisibilityChange(isVisible) {
-    // If section becomes visible and we previously left it
-    if (isVisible && state.hasLeftSection) {
-      console.log('ScrollJack: Re-entering section, animation progress was:', state.lastProgress);
-      state.hasLeftSection = false;
-      state.inReEntryMode = true;
-      
-      // Reset locked state for re-entry
-      if (state.lastProgress > 0) {
-        state.isScrollLocked = true;
-        // Allow some scrolling if we're very close to the end
-        state.allowScrolling = state.lastProgress > 0.95;
+    const rect = targetSection.getBoundingClientRect();
+    const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+    const currentScrollY = Math.round(window.scrollY);
+    
+    // Ensure this log is active for debugging:
+    console.log(`ScrollJack [ReverseDebug Tick]: currentY: ${currentScrollY}, endY: ${scrollY_at_forward_anim_end}, entryBuffer: ${SCROLL_ENTRY_BUFFER}, isVisible: ${isVisible}, reverseMode: ${state.reverseMode}, rect.top: ${rect.top.toFixed(0)}, rect.bottom: ${rect.bottom.toFixed(0)}`);
+
+    const entryPointForReverse = scrollY_at_forward_anim_end - SCROLL_ENTRY_BUFFER;
+
+    if (isVisible) {
+      // Use <= for entryPointForReverse comparison
+      if (!state.reverseMode && currentScrollY <= entryPointForReverse) { 
+        console.log(`ScrollJack: Entering reverse mode. currentY (${currentScrollY}) <= entryPoint (${entryPointForReverse}).`);
+        state.reverseMode = true;
+        scrollY_at_reverse_mode_start = currentScrollY; 
+        console.log(`ScrollJack: scrollY_at_reverse_mode_start set to: ${scrollY_at_reverse_mode_start}`);
+        state.sectionAnimationProgress = 1.0;
+        state.currentStep = state.animationSteps; 
+        updateAnimations(1.0);
+        console.log('ScrollJack: Set animation to progress 1.0 for reverse start.');
       }
-      
-      // Force animation to last known state
-      resumeAnimationFromProgress(state.lastProgress);
-      
-      // Force a redraw of animations
-      forceRedrawAnimations();
-      
-      // After a small delay, turn off re-entry mode
-      setTimeout(() => {
-        state.inReEntryMode = false;
-      }, 500);
-    } 
-    // If section is no longer visible and we hadn't already registered leaving
-    else if (!isVisible && !state.hasLeftSection) {
-      state.hasLeftSection = true;
-      state.lastProgress = state.sectionAnimationProgress;
-      console.log('ScrollJack: Leaving section, stored progress:', state.lastProgress);
+
+      if (state.reverseMode) {
+        if (currentScrollY > scrollY_at_reverse_mode_start + SCROLL_ENTRY_BUFFER) {
+            console.log(`ScrollJack: Exiting reverse mode (scrolled down past start). currentY (${currentScrollY}) > reverseStart (${scrollY_at_reverse_mode_start} + buffer)`);
+            state.reverseMode = false;
+            state.sectionAnimationProgress = 1.0; 
+            state.currentStep = state.animationSteps;
+            updateAnimations(1.0);
+            return;
+        }
+
+        const effectiveReverseStart = Math.min(scrollY_at_reverse_mode_start, scrollY_at_forward_anim_end - SCROLL_ENTRY_BUFFER);
+        const scrolledUpDistance = effectiveReverseStart - currentScrollY;
+        const reverseProgressRaw = scrolledUpDistance / REVERSE_ANIM_SCROLL_RANGE;
+        
+        let newAnimationProgress = 1.0 - reverseProgressRaw; 
+        newAnimationProgress = Math.min(1.0, Math.max(0.0, newAnimationProgress));
+
+        if (Math.abs(state.sectionAnimationProgress - newAnimationProgress) > 0.001) { 
+            console.log(`ScrollJack [ReverseDebug InReverse]: scrolledUp: ${scrolledUpDistance.toFixed(2)}, rawP: ${reverseProgressRaw.toFixed(2)}, animP: ${newAnimationProgress.toFixed(2)}`);
+            state.sectionAnimationProgress = newAnimationProgress;
+            state.currentStep = Math.floor(newAnimationProgress * state.animationSteps);
+            updateAnimations(newAnimationProgress);
+        }
+      }
+    } else { 
+      if (state.reverseMode) {
+        if (rect.bottom <= 0 && currentScrollY < scrollY_at_reverse_mode_start) { 
+          console.log('ScrollJack: Exited reverse mode (scrolled fully above section).');
+          state.reverseMode = false;
+          state.sectionAnimationProgress = 0.0;
+          state.currentStep = 0;
+          updateAnimations(0.0); 
+        }
+      }
     }
   }
 
-  // Force animations to redraw at current progress
-  function forceRedrawAnimations() {
-    // Get all animations in the section
+  function updateAnimations(progress) {
     if (window.heroWidgetAnimation) {
-      const frame = state.lastProgress * (window.heroWidgetAnimation.totalFrames || 100);
-      console.log('ScrollJack: Force redrawing hero animation at frame:', frame);
-      window.heroWidgetAnimation.goToAndStop(frame, true);
+      const totalFrames = window.heroWidgetAnimation.totalFrames || 100;
+      let targetFrame = Math.floor(progress * totalFrames);
+      targetFrame = Math.min(totalFrames -1, Math.max(0, targetFrame)); 
+      window.heroWidgetAnimation.goToAndStop(targetFrame, true);
     }
-    
-    // Force redraw of circles animation if available
     const circlesElement = document.querySelector('#circles-animation');
     if (circlesElement && circlesElement.animation) {
-      const circlesTotalFrames = circlesElement.animation.totalFrames || 100;
-      const circlesTargetFrame = Math.floor(state.lastProgress * circlesTotalFrames);
-      console.log('ScrollJack: Force redrawing circles animation at frame:', circlesTargetFrame);
-      circlesElement.animation.goToFrame(circlesTargetFrame);
+      const totalFrames = circlesElement.animation.totalFrames || 100;
+      let targetFrame = Math.floor(progress * totalFrames);
+      targetFrame = Math.min(totalFrames -1, Math.max(0, targetFrame)); 
+      circlesElement.animation.goToFrame(targetFrame);
     }
-  }
-
-  // Resume animation from stored progress
-  function resumeAnimationFromProgress(progress) {
-    console.log('ScrollJack: Resuming animation from progress:', progress);
-    state.sectionAnimationProgress = progress;
-    state.currentStep = Math.floor(progress * state.animationSteps);
-    
-    // Dispatch progress event to update animations
     const progressEvent = new CustomEvent('scroll-jack-progress', {
-      detail: { 
-        progress: state.sectionAnimationProgress,
-        step: state.currentStep,
-        totalSteps: state.animationSteps,
-        isResuming: true // Flag to indicate this is a resume operation
-      }
+      detail: { progress, step: Math.floor(progress * state.animationSteps), totalSteps: state.animationSteps }
     });
     targetSection.dispatchEvent(progressEvent);
   }
   
-  // Initial setup - lock scrolling
   const initializeScrollJacking = () => {
     document.body.style.overflow = 'hidden';
+    document.body.style.height = '100vh'; 
     console.log('ScrollJack: Scroll locked initially');
-    
-    // Expose crucial methods to window for debugging and external access
-    window.scrollJackAPI = {
-      resumeFrom: resumeAnimationFromProgress,
-      forceRedraw: forceRedrawAnimations,
-      getState: () => ({ ...state })
-    };
   };
   
-  // Handle wheel events for desktop
+  // Forward animation step handlers
   function handleWheel(e) {
-    // Get the current position relative to the target section
+    if (state.forwardCompleted || !state.isScrollLocked || state.allowScrolling) return;
     const rect = targetSection.getBoundingClientRect();
-    const isVisible = (
-      rect.top < window.innerHeight &&
-      rect.bottom > 0
-    );
-    
-    // If section is visible and we should control scrolling
-    if (isVisible && ((state.isScrollLocked && !state.allowScrolling) || state.inReEntryMode)) {
-      e.preventDefault();
-      
-      // If we're in the middle of an animation transition, don't trigger again
-      if (state.isAnimating) return;
-      
-      const deltaY = e.deltaY;
-      
-      // Forward the wheel event to the animation controller
-      if (deltaY > 0) {
-        // Scrolling down in the target section
-        const customEvent = new CustomEvent('scroll-jack-step', {
-          detail: { direction: 'down', delta: Math.abs(deltaY) }
-        });
-        targetSection.dispatchEvent(customEvent);
-        
-        // Increment current step for animation progress
-        state.currentStep = Math.min(state.currentStep + 1, state.animationSteps);
-        
-        // If we've reached the end of animation steps, allow scrolling
-        if (state.currentStep >= state.animationSteps) {
-          state.allowScrolling = true;
-          state.isScrollLocked = false;
-          
-          // Trigger animation complete if not already done
-          if (!state.isAnimationComplete) {
-            handleAnimationComplete();
-          }
-        }
-      } else if (deltaY < 0) {
-        // Scrolling up in the target section
-        const customEvent = new CustomEvent('scroll-jack-step', {
-          detail: { direction: 'up', delta: Math.abs(deltaY) }
-        });
-        targetSection.dispatchEvent(customEvent);
-        
-        // Decrement current step for animation progress
-        state.currentStep = Math.max(state.currentStep - 1, 0);
-      }
-
-      // Update animation progress
-      state.sectionAnimationProgress = state.currentStep / state.animationSteps;
-      
-      // Dispatch progress event
-      const progressEvent = new CustomEvent('scroll-jack-progress', {
-        detail: { 
-          progress: state.sectionAnimationProgress,
-          step: state.currentStep,
-          totalSteps: state.animationSteps
-        }
-      });
-      targetSection.dispatchEvent(progressEvent);
+    if (!(rect.top < window.innerHeight && rect.bottom > 0)) return;
+    e.preventDefault();
+    if (state.isAnimating) return;
+    state.isAnimating = true;
+    const deltaY = e.deltaY;
+    if (deltaY > 0) {
+      state.currentStep = Math.min(state.currentStep + 1, state.animationSteps);
+    } else if (deltaY < 0) {
+      state.currentStep = Math.max(state.currentStep - 1, 0);
     }
+    state.sectionAnimationProgress = state.currentStep / state.animationSteps;
+    updateAnimations(state.sectionAnimationProgress);
+    if (state.currentStep >= state.animationSteps && !state.isAnimationComplete) {
+        handleLottieAnimationComplete(); 
+    }
+    setTimeout(() => state.isAnimating = false, 20); 
   }
   
-  // Handle touch events for mobile
   let touchStartY = 0;
-  
   function handleTouchStart(e) {
+    if (state.forwardCompleted) return;
     touchStartY = e.touches[0].clientY;
   }
   
   function handleTouchMove(e) {
-    // Get the current position relative to the target section
+    if (state.forwardCompleted || !state.isScrollLocked || state.allowScrolling) return;
     const rect = targetSection.getBoundingClientRect();
-    const isVisible = (
-      rect.top < window.innerHeight &&
-      rect.bottom > 0
-    );
-    
-    // If section is visible and we should control scrolling
-    if (isVisible && ((state.isScrollLocked && !state.allowScrolling) || state.inReEntryMode)) {
-      e.preventDefault();
-      
-      if (state.isAnimating) return;
-      
-      const touchY = e.touches[0].clientY;
-      const deltaY = touchStartY - touchY;
-      
-      if (Math.abs(deltaY) > 10) { // Small threshold to avoid tiny movements
-        if (deltaY > 0) {
-          // Swiping up (scrolling down)
-          const customEvent = new CustomEvent('scroll-jack-step', {
-            detail: { direction: 'down', delta: Math.abs(deltaY) }
-          });
-          targetSection.dispatchEvent(customEvent);
-          
-          // Increment current step for animation progress
-          state.currentStep = Math.min(state.currentStep + 1, state.animationSteps);
-          
-          // If we've reached the end of animation steps, allow scrolling
-          if (state.currentStep >= state.animationSteps) {
-            state.allowScrolling = true;
-            state.isScrollLocked = false;
-            
-            // Trigger animation complete if not already done
-            if (!state.isAnimationComplete) {
-              handleAnimationComplete();
-            }
-          }
-        } else {
-          // Swiping down (scrolling up)
-          const customEvent = new CustomEvent('scroll-jack-step', {
-            detail: { direction: 'up', delta: Math.abs(deltaY) }
-          });
-          targetSection.dispatchEvent(customEvent);
-          
-          // Decrement current step for animation progress
-          state.currentStep = Math.max(state.currentStep - 1, 0);
-        }
-        
-        // Update animation progress
-        state.sectionAnimationProgress = state.currentStep / state.animationSteps;
-        
-        // Dispatch progress event
-        const progressEvent = new CustomEvent('scroll-jack-progress', {
-          detail: { 
-            progress: state.sectionAnimationProgress,
-            step: state.currentStep,
-            totalSteps: state.animationSteps
-          }
-        });
-        targetSection.dispatchEvent(progressEvent);
-        
-        // Update touch reference
-        touchStartY = touchY;
+    if (!(rect.top < window.innerHeight && rect.bottom > 0)) return;
+    e.preventDefault();
+    if (state.isAnimating) return;
+    state.isAnimating = true;
+    const touchY = e.touches[0].clientY;
+    const deltaY = touchStartY - touchY; 
+    if (Math.abs(deltaY) > 5) { 
+      if (deltaY > 0) { 
+        state.currentStep = Math.min(state.currentStep + 1, state.animationSteps);
+      } else { 
+        state.currentStep = Math.max(state.currentStep - 1, 0);
       }
+      state.sectionAnimationProgress = state.currentStep / state.animationSteps;
+      updateAnimations(state.sectionAnimationProgress);
+      touchStartY = touchY;
     }
+    if (state.currentStep >= state.animationSteps && !state.isAnimationComplete) {
+        handleLottieAnimationComplete();
+    }
+    setTimeout(() => state.isAnimating = false, 20); 
   }
   
-  // Handle keyboard navigation
   function handleKeyDown(e) {
-    // Get the current position relative to the target section
+    if (state.forwardCompleted || !state.isScrollLocked || state.allowScrolling) return;
     const rect = targetSection.getBoundingClientRect();
-    const isVisible = (
-      rect.top < window.innerHeight &&
-      rect.bottom > 0
-    );
-    
-    if (isVisible && ((state.isScrollLocked && !state.allowScrolling) || state.inReEntryMode)) {
-      const scrollKeys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space'];
-      
-      if (scrollKeys.includes(e.code)) {
-        e.preventDefault();
-        
-        if (state.isAnimating) return;
-        
-        if (['ArrowDown', 'PageDown', 'Space'].includes(e.code)) {
-          // Scrolling down
-          const delta = e.code === 'PageDown' ? 100 : 30;
-          const customEvent = new CustomEvent('scroll-jack-step', {
-            detail: { direction: 'down', delta }
-          });
-          targetSection.dispatchEvent(customEvent);
-          
-          // Increment current step for animation progress
-          const stepIncrement = e.code === 'PageDown' ? 5 : 1;
-          state.currentStep = Math.min(state.currentStep + stepIncrement, state.animationSteps);
-          
-          // If we've reached the end of animation steps, allow scrolling
-          if (state.currentStep >= state.animationSteps) {
-            state.allowScrolling = true;
-            state.isScrollLocked = false;
-            
-            // Trigger animation complete if not already done
-            if (!state.isAnimationComplete) {
-              handleAnimationComplete();
-            }
-          }
-        } else if (['ArrowUp', 'PageUp'].includes(e.code)) {
-          // Scrolling up
-          const delta = e.code === 'PageUp' ? 100 : 30;
-          const customEvent = new CustomEvent('scroll-jack-step', {
-            detail: { direction: 'up', delta }
-          });
-          targetSection.dispatchEvent(customEvent);
-          
-          // Decrement current step for animation progress
-          const stepDecrement = e.code === 'PageUp' ? 5 : 1;
-          state.currentStep = Math.max(state.currentStep - stepDecrement, 0);
-        }
-        
-        // Update animation progress
-        state.sectionAnimationProgress = state.currentStep / state.animationSteps;
-        
-        // Dispatch progress event
-        const progressEvent = new CustomEvent('scroll-jack-progress', {
-          detail: { 
-            progress: state.sectionAnimationProgress,
-            step: state.currentStep,
-            totalSteps: state.animationSteps
-          }
-        });
-        targetSection.dispatchEvent(progressEvent);
-      }
+    if (!(rect.top < window.innerHeight && rect.bottom > 0)) return;
+    const scrollKeys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space'];
+    if (!scrollKeys.includes(e.code)) return;
+    e.preventDefault();
+    if (state.isAnimating) return;
+    state.isAnimating = true;
+    if (['ArrowDown', 'PageDown', 'Space'].includes(e.code)) {
+      const increment = (e.code === 'PageDown') ? 5 : 1;
+      state.currentStep = Math.min(state.currentStep + increment, state.animationSteps);
+    } else if (['ArrowUp', 'PageUp'].includes(e.code)) {
+      const decrement = (e.code === 'PageUp') ? 5 : 1;
+      state.currentStep = Math.max(state.currentStep - decrement, 0);
     }
+    state.sectionAnimationProgress = state.currentStep / state.animationSteps;
+    updateAnimations(state.sectionAnimationProgress);
+    if (state.currentStep >= state.animationSteps && !state.isAnimationComplete) {
+        handleLottieAnimationComplete();
+    }
+    setTimeout(() => state.isAnimating = false, 20); 
   }
   
-  // Handle the animation completion
-  function handleAnimationComplete(event) {
-    console.log('ScrollJack: Lottie animation complete event received');
-    
-    // Mark this section as complete
-    state.completedSections.add(targetSectionId);
-    state.isAnimationComplete = true;
-    
-    // Dispatch our own event to inform that this section's animation is complete
-    setTimeout(() => {
-      const completeEvent = new CustomEvent('animation-complete', {
-        bubbles: true
-      });
-      targetSection.dispatchEvent(completeEvent);
-    }, 300); // Short delay to ensure animation is fully rendered
+  function handleLottieAnimationComplete() {
+    if (state.isAnimationComplete) return; 
+    console.log('ScrollJack: Lottie animation considered complete.');
+    state.isAnimationComplete = true; 
+    const completeEvent = new CustomEvent('animation-complete', { bubbles: true });
+    targetSection.dispatchEvent(completeEvent);
   }
   
-  // Show a scroll indicator after animation completes
-  function showScrollDownIndicator() {
-    // Function disabled to remove "SCROLL TO CONTINUE" indicator
-    return; // Early return to prevent indicator creation
-    
-    /* Original implementation commented out
-    // Check if an indicator already exists
-    if (document.querySelector('.scroll-down-indicator')) return;
-    
-    const indicator = document.createElement('div');
-    indicator.className = 'scroll-down-indicator';
-    indicator.innerHTML = `
-      <div class="indicator-text">Scroll to continue</div>
-      <div class="indicator-arrow">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 5V19M12 19L19 12M12 19L5 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-    `;
-    
-    // Add styles for the indicator
-    const style = document.createElement('style');
-    style.textContent = `
-      .scroll-down-indicator {
-        position: fixed;
-        bottom: 40px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        color: white;
-        z-index: 1000;
-        opacity: 0;
-        animation: fade-in 0.5s ease forwards, bounce 2s infinite 0.5s;
-      }
-      
-      @keyframes fade-in {
-        0% { opacity: 0; }
-        100% { opacity: 1; }
-      }
-      
-      @keyframes bounce {
-        0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
-        40% { transform: translateX(-50%) translateY(-10px); }
-        60% { transform: translateX(-50%) translateY(-5px); }
-      }
-      
-      .indicator-text {
-        margin-bottom: 8px;
-        font-size: 14px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
-    `;
-    
-    document.head.appendChild(style);
-    document.body.appendChild(indicator);
-    
-    // Remove the indicator when user scrolls
-    const removeScrollIndicator = () => {
-      indicator.style.opacity = '0';
-      indicator.style.transition = 'opacity 0.5s ease';
-      setTimeout(() => {
-        if (indicator.parentNode) {
-          document.body.removeChild(indicator);
-        }
-      }, 500);
-      window.removeEventListener('scroll', removeScrollIndicator);
-    };
-    
-    window.addEventListener('scroll', removeScrollIndicator);
-    */
-  }
-  
-  // Smooth scroll to a position
-  function smoothScrollTo(targetY, duration) {
+  function smoothScrollTo(targetY, scrollDuration) {
     const startingY = window.scrollY;
     const diff = targetY - startingY;
-    let start;
-    
-    // Don't animate if already at the target position
     if (Math.abs(diff) < 10) return;
-    
+    let startTimestamp;
     window.requestAnimationFrame(function step(timestamp) {
-      if (!start) start = timestamp;
-      
-      const progress = timestamp - start;
-      const percent = Math.min(progress / duration, 1);
-      
-      // Use the easing function for natural movement
-      const easedPercent = easeInOutCubic(percent);
-      
+      if (!startTimestamp) startTimestamp = timestamp;
+      const elapsed = timestamp - startTimestamp;
+      const percent = Math.min(elapsed / scrollDuration, 1);
+      const easedPercent = 0.5 - 0.5 * Math.cos(percent * Math.PI); 
       window.scrollTo(0, startingY + diff * easedPercent);
-      
-      if (progress < duration) {
+      if (elapsed < scrollDuration) {
         window.requestAnimationFrame(step);
       }
     });
   }
   
-  // Cubic easing for smooth scroll
-  function easeInOutCubic(t) {
-    return t < 0.5 
-      ? 4 * t * t * t 
-      : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
-  }
-  
-  // Initialize everything
   initializeScrollJacking();
   setupEventListeners();
   
-  // Export state for debugging
-  window.scrollJackState = state;
+  window.scrollJackAPI = {
+    getState: () => ({ ...state }),
+    updateAnimations: updateAnimations,
+    forceForwardComplete: () => { 
+        if (!state.forwardCompleted) handleLottieAnimationComplete();
+    }
+  };
 });
 </script>
 
 <style>
-  .scroll-jack {
-    display: none;
-  }
-  
-  :global(html) {
-    scroll-behavior: smooth;
-  }
-  
-  :global(body) {
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-  }
-  
+  .scroll-jack { display: none; }
   :global(body.scroll-locked) {
     overflow: hidden;
-    height: 100vh;
   }
-  
   :global(section.animation-completed) {
-    scroll-snap-align: none;
-  }
-  
-  @media (prefers-reduced-motion: reduce) {
-    :global(html) {
-      scroll-behavior: auto;
-    }
-    
-    :global(body) {
-      scroll-behavior: auto;
-    }
+    scroll-snap-align: none; 
   }
 </style> 

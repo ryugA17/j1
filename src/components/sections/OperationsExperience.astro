@@ -1,0 +1,366 @@
+---
+// src/components/sections/OperationsExperience.astro
+import { Image } from 'astro:assets'; // Import Image component
+
+// Define the structure for each feature
+interface Feature {
+  id: string;
+  navTitle: string;
+  title: string;
+  description: string;
+  imageName: string; // Will be like "/images/1.png", etc.
+}
+
+const features: Feature[] = [
+  {
+    id: "click-ops",
+    navTitle: "Powerful click-ops",
+    title: "Quickly see what matters",
+    description: "The new Aerospike Cloud UI combines operations, analytics, and organizational management in a single interface.",
+    imageName: "/images/1.png"
+  },
+  {
+    id: "rapid-deployment",
+    navTitle: "Rapid deployment",
+    title: "Optimize cost and performance for each workload",
+    description: "Scale vertically or horizontally, with full control over instance types, replication settings and storage strategies.",
+    imageName: "/images/2.png"
+  },
+  {
+    id: "api-automation",
+    navTitle: "API automation",
+    title: "Automate cluster management",
+    description: "Provision, manage, and scale clusters via REST API or Terraform—no fingers on keyboards.",
+    imageName: "/images/3.png"
+  },
+  {
+    id: "simplified-upgrades",
+    navTitle: "Simplified upgrades",
+    title: "Seamless, Zero-Downtime Upgrades",
+    description: "Upgrade your clusters with no disruption to your applications. Our managed service handles the complexities of the upgrade process, ensuring a smooth transition to the latest versions and features.",
+    imageName: "/images/4.png"
+  },
+  {
+    id: "flexible-scaling",
+    navTitle: "Flexible scaling",
+    title: "Scale On-Demand with Predictable Performance",
+    description: "Easily adjust your cluster resources up or down to meet fluctuating demands. Aerospike Cloud provides robust tools for scaling your database, ensuring you only pay for what you need while maintaining optimal performance.",
+    imageName: "/images/5.png"
+  },
+  {
+    id: "low-latency",
+    navTitle: "Low latency architecture",
+    title: "Experience low-latency, secure connectivity",
+    description: "Minimize latency with direct network paths and dedicated subnets—configure directional access and IP space.",
+    imageName: "/images/6.png"
+  }
+];
+
+// We'll need client-side JavaScript to handle the tab switching
+---
+
+<section class="operations-experience-section font-sans">
+  <div class="container mx-auto main-container">
+    <h2 class="section-title">A fresh operations experience</h2>
+    
+    <div class="content-layout">
+      <!-- Left Navigation -->
+      <div class="nav-column">
+        <nav id="ops-nav" class="ops-navigation">
+          {features.map((feature, index) => (
+            <button 
+              data-target={feature.id}
+              class:list={[
+                "ops-nav-item", 
+                { 'is-active': index === 0 }
+              ]}
+            >
+              <span class="indicator"></span>
+              <span class="nav-text">{feature.navTitle}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
+      
+      <!-- Right Content Area -->
+      <div class="content-column">
+        {features.map((feature, index) => (
+          <div 
+            id={feature.id} 
+            class:list={[
+              "ops-content-panel", 
+              { 'hidden': index !== 0 }
+            ]}
+          >
+            <div class="panel-text-content">
+              <h3 class="panel-title">{feature.title}</h3>
+              <p class="panel-description">{feature.description}</p>
+            </div>
+            <div class="panel-image-area">
+              <!-- Using astro:assets Image component for images in public folder -->
+              <img src={feature.imageName} alt={feature.title} class="panel-image" loading="lazy" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const navItems = document.querySelectorAll('.ops-nav-item');
+    const contentPanels = document.querySelectorAll('.ops-content-panel');
+
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const targetId = item.getAttribute('data-target');
+
+        navItems.forEach(nav => nav.classList.remove('is-active'));
+        item.classList.add('is-active');
+
+        contentPanels.forEach(panel => {
+          if (panel.id === targetId) {
+            panel.classList.remove('hidden');
+          } else {
+            panel.classList.add('hidden');
+          }
+        });
+      });
+    });
+  });
+</script>
+
+<style>
+  /* Ensure this font is globally available */
+  .font-sans {
+    font-family: "Helvetica Now Display", system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  }
+
+  .operations-experience-section {
+    background-color: var(--color-background, #ffffff); /* From WhyUs */
+    padding: 80px 0; /* Increased padding */
+  }
+
+  .main-container {
+    max-width: 1280px; /* Consistent with other sections */
+    padding-left: 1rem; /* approx 16px */
+    padding-right: 1rem;
+  }
+
+  .section-title {
+    font-family: "Helvetica Now Display", sans-serif;
+    font-size: clamp(2.2rem, 5vw, 3rem); /* Larger like WhyUs titles */
+    font-weight: 500; /* Bold */
+    color: var(--color-foreground, #1a1a1a);
+    margin-bottom: 48px; /* From WhyUs .texts margin-bottom or .cost-comparison-left gap */
+    text-align: center; /* Changed from left to center */
+  }
+
+  .content-layout {
+    display: flex;
+    gap: 50px; /* Increased gap between nav and content */
+    align-items: flex-start;
+    position: sticky; /* ADDED */
+    top: 120px; /* ADDED - align with original nav sticky point */
+    z-index: 10; /* ADDED - for stacking context */
+    /* background-color: var(--color-background, #ffffff); Optional: if it needs its own background when sticky */
+  }
+
+  .nav-column {
+    width: 25%; /* approx 1/4 for nav */
+    flex-shrink: 0;
+    position: sticky;
+    top: 0px; /* UPDATED - now sticks to top of sticky .content-layout */
+  }
+
+  .ops-navigation {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Space between nav items */
+  }
+
+  .ops-nav-item {
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 8px 0; /* Vertical padding for clickable area */
+    text-align: left;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s ease;
+  }
+
+  .ops-nav-item .indicator {
+    width: 3px;
+    height: 20px;
+    background-color: transparent;
+    margin-right: 16px; /* Space between indicator and text */
+    transition: background-color 0.2s ease;
+    border-radius: 2px; /* slightly rounded indicator */
+  }
+
+  .ops-nav-item .nav-text {
+    font-family: "Helvetica Now Display", sans-serif;
+    font-size: clamp(0.95rem, 2vw, 1.05rem); /* Adjusted size */
+    color: var(--color-muted-foreground, #575757); /* From WhyUs .text-block p */
+    font-weight: 400; /* normal */
+    transition: color 0.2s ease, font-weight 0.2s ease;
+  }
+
+  .ops-nav-item.is-active .indicator {
+    background-color: var(--color-foreground, #1a1a1a); /* Dark indicator for active */
+  }
+
+  .ops-nav-item.is-active .nav-text {
+    color: var(--color-foreground, #1a1a1a);
+    font-weight: 500; /* medium for active, similar to WhyUs h3 */
+  }
+  
+  .ops-nav-item:not(.is-active):hover .nav-text {
+    color: var(--color-foreground, #1a1a1a);
+  }
+  .ops-nav-item:not(.is-active):hover .indicator {
+    background-color: var(--color-muted, #b4b4b4); /* Subtle hover for indicator */
+  }
+
+  .content-column {
+    width: 75%; /* approx 3/4 for content */
+  }
+
+  .ops-content-panel {
+    background-color: var(--color-accent, #F9F9F7); /* From WhyUs .comparison-card, adjusted to match image */
+    border-radius: 20px; /* UPDATED from 24px */
+    padding: 20px; /* UPDATED from 40px */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06); /* Adjusted shadow */
+    display: flex;
+    gap: 10px; /* UPDATED from 32px */
+    align-items: flex-start; /* Align items to top */
+    height: 440px; /* ADDED - fixed height */
+    width: 100%; /* ADDED - fill parent */
+    max-width: 1070px; /* ADDED - user requested max width */
+    overflow-y: auto; /* ADDED - for scroll if content overflows */
+    /* min-height: 500px; REMOVED - replaced by fixed height */
+  }
+
+  .panel-text-content {
+    width: 40%; /* Similar to .card-text-content in WhyUs, adjusted for image */
+    flex-shrink: 0;
+  }
+
+  .panel-title {
+    font-family: "Helvetica Now Display", sans-serif;
+    font-size: clamp(1.5rem, 3.5vw, 2rem); /* From WhyUs .comparison-card h4, adjusted */
+    font-weight: 500; /* Bolder to match target image */
+    color: var(--color-foreground, #1a1a1a);
+    margin-bottom: 16px;
+    line-height: 1.3;
+  }
+
+  .panel-description {
+    font-family: "Helvetica Now Display", sans-serif;
+    font-size: clamp(0.9rem, 2vw, 1rem); /* From WhyUs .text-block p */
+    color: var(--color-muted-foreground, #393939); /* Darker muted */
+    line-height: 1.6;
+  }
+
+  .panel-image-area {
+    width: 60%; /* Remaining width */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .panel-image {
+    width: 100%;
+    height: auto;
+    max-height: 390px; /* UPDATED from 420px, to fit new panel height and padding */
+    border-radius: 12px; /* Rounded corners for image */
+    object-fit: contain;
+  }
+
+  /* Mobile Styles */
+  @media (max-width: 1024px) {
+    .content-layout {
+      gap: 30px;
+    }
+    .nav-column {
+      width: 30%;
+    }
+    .content-column {
+      width: 70%;
+    }
+    .ops-content-panel {
+        padding: 32px;
+        min-height: 450px;
+    }
+    .panel-title {
+        font-size: clamp(1.3rem, 3vw, 1.8rem);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .section-title {
+        font-size: clamp(1.8rem, 5vw, 2.2rem); 
+        margin-bottom: 32px;
+    }
+    .content-layout {
+      flex-direction: column;
+      gap: 24px;
+    }
+    .nav-column {
+      width: 100%;
+      position: static; /* Remove sticky on mobile */
+      margin-bottom: 16px;
+    }
+    .ops-navigation {
+      flex-direction: row; /* Horizontal nav on mobile */
+      overflow-x: auto; /* Scrollable horizontal nav */
+      padding-bottom: 8px; /* Space for scrollbar */
+      gap: 0; /* Remove column gap */
+    }
+    .ops-nav-item {
+      padding: 8px 12px; /* Padding for touch targets */
+      white-space: nowrap; /* Prevent nav text wrapping */
+      border-bottom: 3px solid transparent; /* For active state indicator below */
+    }
+    .ops-nav-item .indicator {
+      display: none; /* Hide vertical indicator on mobile */
+    }
+    .ops-nav-item.is-active {
+        border-bottom-color: var(--color-foreground, #1a1a1a);
+    }
+    .ops-nav-item.is-active .nav-text {
+        color: var(--color-foreground, #1a1a1a);
+        font-weight: 500;
+    }
+    .ops-nav-item:not(.is-active) .nav-text {
+        color: var(--color-muted-foreground, #575757);
+    }
+
+    .content-column {
+      width: 100%;
+    }
+    .ops-content-panel {
+      flex-direction: column; /* Stack text and image */
+      padding: 24px; /* Mobile padding can be different if needed, current is 24px */
+      min-height: auto; /* Retain for mobile */
+      height: auto; /* Override fixed height for mobile */
+      gap: 24px; /* Mobile gap can be different */
+      max-width: 100%; /* Ensure it doesn't try to be 1070px on mobile */
+    }
+    .panel-text-content,
+    .panel-image-area {
+      width: 100%;
+    }
+    .panel-image {
+        max-height: 300px;
+    }
+  }
+
+  /* Ensure hidden class works as expected */
+  .hidden {
+    display: none !important;
+  }
+</style> 
