@@ -1,6 +1,6 @@
 ---
 // src/components/sections/OperationsExperience.astro
-import { Image } from 'astro:assets'; // Import Image component
+// import { Image } from 'astro:assets'; // Not needed if images are in /public
 
 // Define the structure for each feature
 interface Feature {
@@ -8,7 +8,7 @@ interface Feature {
   navTitle: string;
   title: string;
   description: string;
-  imageName: string; // Will be like "/images/1.png", etc.
+  imageName: string;
 }
 
 const features: Feature[] = [
@@ -17,7 +17,7 @@ const features: Feature[] = [
     navTitle: "Powerful click-ops",
     title: "Quickly see what matters",
     description: "The new Aerospike Cloud UI combines operations, analytics, and organizational management in a single interface.",
-    imageName: "/images/1.png"
+    imageName: "/images/1.png" 
   },
   {
     id: "rapid-deployment",
@@ -56,7 +56,6 @@ const features: Feature[] = [
   }
 ];
 
-// We'll need client-side JavaScript to handle the tab switching
 ---
 
 <section class="operations-experience-section font-sans">
@@ -64,16 +63,13 @@ const features: Feature[] = [
     <h2 class="section-title">A fresh operations experience</h2>
     
     <div class="content-layout">
-      <!-- Left Navigation -->
+      {/* Left Navigation - DESKTOP ONLY */} 
       <div class="nav-column">
-        <nav id="ops-nav" class="ops-navigation">
+        <nav id="ops-nav-desktop" class="ops-navigation">
           {features.map((feature, index) => (
             <button 
-              data-target={feature.id}
-              class:list={[
-                "ops-nav-item", 
-                { 'is-active': index === 0 }
-              ]}
+              data-target={`content-${feature.id}`}
+              class:list={["ops-nav-item", { 'is-active': index === 0 }]}
             >
               <span class="indicator"></span>
               <span class="nav-text">{feature.navTitle}</span>
@@ -82,23 +78,31 @@ const features: Feature[] = [
         </nav>
       </div>
       
-      <!-- Right Content Area -->
+      {/* Right Content Area - Houses mobile dropdown and content panels */} 
       <div class="content-column">
+        {/* Mobile Dropdown - MOBILE ONLY */} 
+        <select id="ops-select-mobile" class="ops-select-mobile">
+          {/* Options will be populated by JavaScript */} 
+        </select>
+
+        {/* Content Panels - Shared between desktop and mobile, visibility controlled by JS */} 
         {features.map((feature, index) => (
           <div 
-            id={feature.id} 
+            id={`content-${feature.id}`} 
             class:list={[
               "ops-content-panel", 
-              { 'hidden': index !== 0 }
+              { 'is-active': index === 0 } // For desktop initial active state
+              // 'is-selected-mobile' will be added by JS for mobile
             ]}
+            role="tabpanel" 
+            aria-labelledby={index === 0 ? `trigger-${feature.id}` : undefined} // If using actual tabs/accordion roles
           >
+            <div class="panel-image-area">
+              <img src={feature.imageName} alt={feature.title} class="panel-image" loading="lazy" />
+            </div>
             <div class="panel-text-content">
               <h3 class="panel-title">{feature.title}</h3>
               <p class="panel-description">{feature.description}</p>
-            </div>
-            <div class="panel-image-area">
-              <!-- Using astro:assets Image component for images in public folder -->
-              <img src={feature.imageName} alt={feature.title} class="panel-image" loading="lazy" />
             </div>
           </div>
         ))}
@@ -107,259 +111,305 @@ const features: Feature[] = [
   </div>
 </section>
 
-<script>
+<script define:vars={{ features }}>
   document.addEventListener('DOMContentLoaded', () => {
-    const navItems = document.querySelectorAll('.ops-nav-item');
+    const desktopNavItems = document.querySelectorAll('.ops-nav-item');
     const contentPanels = document.querySelectorAll('.ops-content-panel');
+    const mobileSelect = document.getElementById('ops-select-mobile');
 
-    navItems.forEach(item => {
+    // --- Populate Mobile Dropdown --- 
+    if (mobileSelect && features && features.length > 0) {
+      features.forEach((feature, index) => {
+        const option = document.createElement('option');
+        option.value = feature.id;
+        option.textContent = feature.navTitle;
+        if (index === 0) {
+          option.selected = true;
+        }
+        mobileSelect.appendChild(option);
+      });
+    }
+
+    // --- Desktop Navigation Logic --- 
+    desktopNavItems.forEach(item => {
       item.addEventListener('click', () => {
         const targetId = item.getAttribute('data-target');
-
-        navItems.forEach(nav => nav.classList.remove('is-active'));
+        desktopNavItems.forEach(nav => nav.classList.remove('is-active'));
         item.classList.add('is-active');
 
         contentPanels.forEach(panel => {
           if (panel.id === targetId) {
-            panel.classList.remove('hidden');
+            panel.classList.add('is-active');
           } else {
-            panel.classList.add('hidden');
+            panel.classList.remove('is-active');
           }
         });
       });
     });
+
+    // --- Mobile Dropdown Logic --- 
+    function handleMobileSelection() {
+      if (!mobileSelect) return;
+      const selectedId = mobileSelect.value;
+      contentPanels.forEach(panel => {
+        if (panel.id === `content-${selectedId}`) {
+          panel.classList.add('is-selected-mobile');
+        } else {
+          panel.classList.remove('is-selected-mobile');
+        }
+      });
+    }
+
+    if (mobileSelect) {
+      mobileSelect.addEventListener('change', handleMobileSelection);
+      // Initial load: set the first panel visible for mobile
+      if (features && features.length > 0) {
+         // Ensure panels are correctly initialized regarding desktop 'is-active'
+        contentPanels.forEach((panel, idx) => {
+            if (idx === 0) {
+                if(window.innerWidth <= 768) panel.classList.add('is-selected-mobile');
+            } else {
+                panel.classList.remove('is-selected-mobile');
+            }
+        });
+      }
+    }
   });
 </script>
 
 <style>
-  /* Ensure this font is globally available */
+  /* Base font */
   .font-sans {
     font-family: "Helvetica Now Display", system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   }
 
   .operations-experience-section {
-    background-color: var(--color-background, #ffffff); /* From WhyUs */
-    padding: 80px 0; /* Increased padding */
+    background-color: var(--color-background, #ffffff);
+    padding: 80px 0;
   }
 
   .main-container {
-    max-width: 1280px; /* Consistent with other sections */
-    padding-left: 1rem; /* approx 16px */
+    max-width: 1280px;
+    padding-left: 1rem;
     padding-right: 1rem;
   }
 
   .section-title {
     font-family: "Helvetica Now Display", sans-serif;
-    font-size: clamp(2.2rem, 5vw, 3rem); /* Larger like WhyUs titles */
-    font-weight: 500; /* Bold */
+    font-size: clamp(2.2rem, 5vw, 3rem);
+    font-weight: 500;
     color: var(--color-foreground, #1a1a1a);
-    margin-bottom: 48px; /* From WhyUs .texts margin-bottom or .cost-comparison-left gap */
-    text-align: center; /* Changed from left to center */
+    margin-bottom: 48px;
+    text-align: center;
   }
 
+  /* Desktop Layout */
   .content-layout {
     display: flex;
-    gap: 50px; /* Increased gap between nav and content */
+    gap: 50px;
     align-items: flex-start;
-    position: sticky; /* ADDED */
-    top: 120px; /* ADDED - align with original nav sticky point */
-    z-index: 10; /* ADDED - for stacking context */
-    /* background-color: var(--color-background, #ffffff); Optional: if it needs its own background when sticky */
+    position: sticky;
+    top: 120px;
+    z-index: 10;
   }
 
-  .nav-column {
-    width: 25%; /* approx 1/4 for nav */
+  .nav-column { /* Desktop Nav Column */
+    width: 25%;
     flex-shrink: 0;
     position: sticky;
-    top: 0px; /* UPDATED - now sticks to top of sticky .content-layout */
+    top: 0px;
   }
 
-  .ops-navigation {
+  .ops-navigation { /* Desktop Nav List */
     display: flex;
     flex-direction: column;
-    gap: 12px; /* Space between nav items */
+    gap: 12px;
   }
 
-  .ops-nav-item {
+  .ops-nav-item { /* Desktop Nav Button */
     display: flex;
     align-items: center;
     background: none;
     border: none;
-    padding: 8px 0; /* Vertical padding for clickable area */
+    padding: 8px 0;
     text-align: left;
     cursor: pointer;
     position: relative;
-    transition: color 0.2s ease;
   }
-
   .ops-nav-item .indicator {
     width: 3px;
     height: 20px;
     background-color: transparent;
-    margin-right: 16px; /* Space between indicator and text */
+    margin-right: 16px;
     transition: background-color 0.2s ease;
-    border-radius: 2px; /* slightly rounded indicator */
+    border-radius: 2px;
   }
-
   .ops-nav-item .nav-text {
     font-family: "Helvetica Now Display", sans-serif;
-    font-size: clamp(0.95rem, 2vw, 1.05rem); /* Adjusted size */
-    color: var(--color-muted-foreground, #575757); /* From WhyUs .text-block p */
-    font-weight: 400; /* normal */
+    font-size: clamp(0.95rem, 2vw, 1.05rem);
+    color: var(--color-muted-foreground, #575757);
+    font-weight: 400;
     transition: color 0.2s ease, font-weight 0.2s ease;
   }
-
   .ops-nav-item.is-active .indicator {
-    background-color: var(--color-foreground, #1a1a1a); /* Dark indicator for active */
+    background-color: var(--color-foreground, #1a1a1a);
   }
-
   .ops-nav-item.is-active .nav-text {
     color: var(--color-foreground, #1a1a1a);
-    font-weight: 500; /* medium for active, similar to WhyUs h3 */
+    font-weight: 500;
   }
-  
   .ops-nav-item:not(.is-active):hover .nav-text {
     color: var(--color-foreground, #1a1a1a);
   }
   .ops-nav-item:not(.is-active):hover .indicator {
-    background-color: var(--color-muted, #b4b4b4); /* Subtle hover for indicator */
+    background-color: var(--color-muted, #b4b4b4);
   }
 
   .content-column {
-    width: 75%; /* approx 3/4 for content */
+    width: 75%;
   }
 
-  .ops-content-panel {
-    background-color: var(--color-accent, #F9F9F7); /* From WhyUs .comparison-card, adjusted to match image */
-    border-radius: 20px; /* UPDATED from 24px */
-    padding: 20px; /* UPDATED from 40px */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.06); /* Adjusted shadow */
+  .ops-select-mobile {
+    display: none; /* Hidden on desktop */
+  }
+
+  .ops-content-panel { /* Shared styles for content panel */
+    background-color: var(--color-accent, #F9F9F7); /* Default bg for desktop */
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    display: none; /* Hidden by default, shown by .is-active (desktop) or .is-selected-mobile (mobile) */
+    gap: 10px;
+    align-items: flex-start;
+    height: 440px;
+    width: 100%;
+    max-width: 1070px;
+    overflow-y: auto;
+  }
+  .ops-content-panel.is-active { /* Desktop: Show active panel */
     display: flex;
-    gap: 10px; /* UPDATED from 32px */
-    align-items: flex-start; /* Align items to top */
-    height: 440px; /* ADDED - fixed height */
-    width: 100%; /* ADDED - fill parent */
-    max-width: 1070px; /* ADDED - user requested max width */
-    overflow-y: auto; /* ADDED - for scroll if content overflows */
-    /* min-height: 500px; REMOVED - replaced by fixed height */
   }
 
   .panel-text-content {
-    width: 40%; /* Similar to .card-text-content in WhyUs, adjusted for image */
+    width: 40%;
     flex-shrink: 0;
   }
-
   .panel-title {
     font-family: "Helvetica Now Display", sans-serif;
-    font-size: clamp(1.5rem, 3.5vw, 2rem); /* From WhyUs .comparison-card h4, adjusted */
-    font-weight: 500; /* Bolder to match target image */
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 500;
     color: var(--color-foreground, #1a1a1a);
     margin-bottom: 16px;
     line-height: 1.3;
   }
-
   .panel-description {
     font-family: "Helvetica Now Display", sans-serif;
-    font-size: clamp(0.9rem, 2vw, 1rem); /* From WhyUs .text-block p */
-    color: var(--color-muted-foreground, #393939); /* Darker muted */
+    font-size: clamp(0.9rem, 2vw, 1rem);
+    color: var(--color-muted-foreground, #393939);
     line-height: 1.6;
   }
-
   .panel-image-area {
-    width: 60%; /* Remaining width */
+    width: 60%;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-
   .panel-image {
     width: 100%;
     height: auto;
-    max-height: 390px; /* UPDATED from 420px, to fit new panel height and padding */
-    border-radius: 12px; /* Rounded corners for image */
+    max-height: 390px;
+    border-radius: 12px;
     object-fit: contain;
   }
 
   /* Mobile Styles */
-  @media (max-width: 1024px) {
-    .content-layout {
-      gap: 30px;
-    }
-    .nav-column {
-      width: 30%;
-    }
-    .content-column {
-      width: 70%;
-    }
-    .ops-content-panel {
-        padding: 32px;
-        min-height: 450px;
-    }
-    .panel-title {
-        font-size: clamp(1.3rem, 3vw, 1.8rem);
-    }
-  }
-
   @media (max-width: 768px) {
-    .section-title {
-        font-size: clamp(1.8rem, 5vw, 2.2rem); 
-        margin-bottom: 32px;
-    }
     .content-layout {
+      position: static; /* Override desktop sticky */
       flex-direction: column;
-      gap: 24px;
+      gap: 16px; /* Gap between dropdown and content panel */
     }
-    .nav-column {
-      width: 100%;
-      position: static; /* Remove sticky on mobile */
-      margin-bottom: 16px;
+    .nav-column { /* Hide desktop nav */
+      display: none;
     }
-    .ops-navigation {
-      flex-direction: row; /* Horizontal nav on mobile */
-      overflow-x: auto; /* Scrollable horizontal nav */
-      padding-bottom: 8px; /* Space for scrollbar */
-      gap: 0; /* Remove column gap */
-    }
-    .ops-nav-item {
-      padding: 8px 12px; /* Padding for touch targets */
-      white-space: nowrap; /* Prevent nav text wrapping */
-      border-bottom: 3px solid transparent; /* For active state indicator below */
-    }
-    .ops-nav-item .indicator {
-      display: none; /* Hide vertical indicator on mobile */
-    }
-    .ops-nav-item.is-active {
-        border-bottom-color: var(--color-foreground, #1a1a1a);
-    }
-    .ops-nav-item.is-active .nav-text {
-        color: var(--color-foreground, #1a1a1a);
-        font-weight: 500;
-    }
-    .ops-nav-item:not(.is-active) .nav-text {
-        color: var(--color-muted-foreground, #575757);
-    }
-
     .content-column {
       width: 100%;
     }
-    .ops-content-panel {
-      flex-direction: column; /* Stack text and image */
-      padding: 24px; /* Mobile padding can be different if needed, current is 24px */
-      min-height: auto; /* Retain for mobile */
-      height: auto; /* Override fixed height for mobile */
-      gap: 24px; /* Mobile gap can be different */
-      max-width: 100%; /* Ensure it doesn't try to be 1070px on mobile */
+
+    .ops-select-mobile {
+      display: block !important; /* Show on mobile */
+      width: 100%;
+      padding: 12px 16px;
+      font-family: "Helvetica Now Display", sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--color-foreground, #1a1a1a);
+      background-color: #051028; /* Dark blue/black like accordion trigger */
+      color: white;
+      border: 1px solid var(--color-border, #b4b4b4);
+      border-radius: 99px; /* Pill shape */
+      appearance: none; /* Remove default system appearance */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff' width='18px' height='18px'%3E%3Cpath d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E"); /* Custom arrow */
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      cursor: pointer;
     }
-    .panel-text-content,
-    .panel-image-area {
+    .ops-select-mobile:focus {
+      outline: none;
+      border-color: var(--color-primary, #fdec2f);
+      box-shadow: 0 0 0 2px rgba(253,236,47,0.5);
+    }
+    
+    .ops-content-panel {
+      display: none; /* Ensure all are hidden initially on mobile before JS selects one */
+      flex-direction: column;
+      height: auto;
+      width: 100%;
+      max-width: 100%;
+      box-shadow: none;
+      overflow-y: visible;
+      margin-top: 0; /* Will be controlled by .is-selected-mobile or direct adjacent styling */
+       /* Styling for the mobile "card" look will be on .is-selected-mobile */
+      background-color: transparent; /* Panel itself is transparent, card styling on .is-selected-mobile */
+      border: none; /* Remove default panel border/bg for mobile if card style is applied by .is-selected-mobile */
+      padding: 0;
+    }
+
+    .ops-content-panel.is-active { /* Desktop class should not force display on mobile */
+        display: none !important; 
+    }
+
+    .ops-content-panel.is-selected-mobile {
+      display: flex !important; /* Show selected panel */
+      background-color: var(--color-accent, #F9F9F7); /* Accordion card background */
+      border: 2px dotted #0077FF; /* Blue dotted border */
+      border-radius: 20px;
+      padding: 20px; /* Padding for the card */
+      margin-top: 16px; /* Space below dropdown */
+       /* Ensure stacking and sizing are correct */
+      height: auto; /* Override desktop fixed height */
+      gap: 16px; /* Space between image and text content on mobile */
+    }
+
+    .ops-content-panel.is-selected-mobile .panel-image-area {
+      order: 1;
       width: 100%;
     }
-    .panel-image {
-        max-height: 300px;
+    .ops-content-panel.is-selected-mobile .panel-text-content {
+      order: 2;
+      width: 100%;
+    }
+    .ops-content-panel.is-selected-mobile .panel-image {
+      max-height: 280px;
+    }
+    .ops-content-panel.is-selected-mobile .panel-title {
+      font-size: clamp(1.3rem, 4vw, 1.6rem);
+    }
+    .ops-content-panel.is-selected-mobile .panel-description {
+      font-size: clamp(0.85rem, 2.5vw, 0.95rem);
     }
   }
 
-  /* Ensure hidden class works as expected */
   .hidden {
     display: none !important;
   }
