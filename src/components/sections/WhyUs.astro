@@ -11,7 +11,9 @@ import iconStats2 from '../../assets/Group 10124044.png';
 import iconStats3 from '../../assets/Frame 2147204652.png';
 import wayfairShowcaseImage from '../../assets/g1.jpg';
 import wayfairLogoImage from '../../assets/wayfair.png';
-import fintechShowcaseImage from '../../assets/g2.jpg'; // New image import
+import fintechShowcaseImage from '../../assets/g2.jpg';
+import adtechShowcaseImage from '../../assets/g3.jpg'; // New AdTech image
+import adtechLogoImage from '../../assets/b1.png'; // New AdTech logo
 // Removed dream11Logo and amitGardeImage imports as they are part of mediaImage
 ---
 
@@ -103,6 +105,48 @@ import fintechShowcaseImage from '../../assets/g2.jpg'; // New image import
         </ul>
       </div>
     </div>
+
+    <!-- New "USE CASES" text block, styled like TrustAndSecurity.astro .texts -->
+    <div class="texts use-cases-heading-block"> 
+      <SectionName>USE CASES</SectionName>
+      <SectionHeading>Trusted wherever 'good enough' isn't good enough</SectionHeading>
+    </div>
+
+    <!-- New Ad & Marketing Tech Section - Text Left, Image Right -->
+    <div class="adtech-case-study-wrapper space-above">
+      <div class="adtech-showcase-layout">
+        <div class="adtech-text-column"> {/* Text on the left */}
+          <p class="adtech-category">Ad & marketing tech</p>
+          <h2 class="adtech-title">User profile stores</h2>
+          <p class="adtech-description">
+            Rely on predictable real-time reads during high-volume
+            continuous writes—even as terabytes turn into petabytes.
+          </p>
+          
+          <div class="adtech-client-box">
+            <div class="adtech-client-info">
+              <div class="adtech-client-logo-container">
+                <Image src={adtechLogoImage} alt="AdTech Partner Logo" class="adtech-client-logo-img" />
+              </div>
+              <div class="adtech-client-text">
+                <p>Aerospike named AWS 2024<br>AdTech partner of the year</p>
+              </div>
+            </div>
+            <div class="adtech-client-arrow">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="adtech-image-column"> {/* Image on the right */}
+          <div class="adtech-image-container">
+             <Image src={adtechShowcaseImage} alt="Ad & marketing tech showcase" class="adtech-main-image" />
+          </div>
+        </div>
+      </div>
+    </div>
+    {/* End of New Ad & Marketing Tech Section */}
 
     <!-- New Fintech Showcase Section - Image Left, Text Right -->
     <div class="fintech-case-study-wrapper space-above">
@@ -362,6 +406,7 @@ import fintechShowcaseImage from '../../assets/g2.jpg'; // New image import
   @media (max-width: 1024px) {
     .cost-comparison-layout,
     .testimonial-stats-layout,
+    .adtech-case-study-wrapper .adtech-showcase-layout,
     .fintech-case-study-wrapper .fintech-showcase-layout,
     .wayfair-case-study-wrapper .wayfair-showcase-layout {
       flex-direction: column;
@@ -373,6 +418,8 @@ import fintechShowcaseImage from '../../assets/g2.jpg'; // New image import
     .cost-comparison-right,
     .testimonial-image-column,
     .stats-column,
+    .adtech-text-column,
+    .adtech-image-column,
     .fintech-image-column,
     .fintech-text-column,
     .wayfair-showcase-left, 
@@ -400,6 +447,10 @@ import fintechShowcaseImage from '../../assets/g2.jpg'; // New image import
     .fintech-title,
     .fintech-description {
         /* Consider adjusting font sizes for fintech section if needed at this breakpoint */
+    }
+    .adtech-title,
+    .adtech-description {
+        /* Consider adjusting font sizes for adtech section if needed */
     }
   }
 
@@ -464,6 +515,18 @@ import fintechShowcaseImage from '../../assets/g2.jpg'; // New image import
     .fintech-client-arrow {
       align-self: flex-end;
     }
+
+    /* AdTech section adjustments for 768px */
+    .adtech-case-study-wrapper {
+      padding-top: 40px; padding-bottom: 80px; padding-left: 20px; padding-right: 20px;
+    }
+    .adtech-title { font-size: 28px; }
+    .adtech-description { font-size: 16px; }
+    .adtech-client-box {
+      flex-direction: column; align-items: flex-start; gap: 16px;
+    }
+    .adtech-client-info { width: 100%; }
+    .adtech-client-arrow { align-self: flex-end; }
   }
 
   /* New Wayfair Showcase Section Styles - Revised */
@@ -648,7 +711,7 @@ import fintechShowcaseImage from '../../assets/g2.jpg'; // New image import
   }
 
   .fintech-case-study-wrapper.space-above {
-    margin-top: 100px;
+    margin-top: -20px; /* Adjusted for consistent spacing after AdTech section */
   }
 
   .fintech-showcase-layout {
@@ -755,5 +818,83 @@ import fintechShowcaseImage from '../../assets/g2.jpg'; // New image import
   
   .fintech-client-box:hover .fintech-client-arrow {
     background-color: #000; /* Example hover, can be themed */
+  }
+
+  /* New AdTech Showcase Section Styles (adapted from Wayfair) */
+  .adtech-case-study-wrapper {
+    background-color: rgb(255, 255, 255); /* White background */
+    padding-top: 60px;
+    padding-bottom: 120px;
+    border-radius: 20px;
+    margin-left: calc(-1 * var(--container-padding, 0px));
+    margin-right: calc(-1 * var(--container-padding, 0px));
+    padding-left: var(--container-padding, 60px);
+    padding-right: var(--container-padding, 60px);
+  }
+
+  .adtech-case-study-wrapper.space-above {
+    margin-top: 100px; /* Standard spacing for the first new section */
+  }
+
+  .adtech-showcase-layout {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 410px;
+    max-width: 1320px;
+    margin: 0 auto;
+    gap: 20px;
+  }
+
+  .adtech-text-column { /* Text on Left */
+    max-width: 500px; /* Matching Wayfair */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+  }
+  
+  .adtech-category {
+    font-size: 18px; color: #888; margin-bottom: 12px;
+  }
+  .adtech-title {
+    font-size: 36px; font-weight: 700; color: #000; margin-bottom: 16px; line-height: 1.2;
+  }
+  .adtech-description {
+    font-size: 18px; line-height: 1.5; color: #555; margin-bottom: 32px;
+  }
+  
+  .adtech-client-box {
+    display: flex; align-items: center; justify-content: space-between;
+    background-color: #f9f9f9; border-radius: 12px; padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; width: 100%;
+  }
+  .adtech-client-box:hover {
+    transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  }
+  .adtech-client-info { display: flex; align-items: center; gap: 16px; }
+  .adtech-client-logo-container { width: 100px; flex-shrink: 0; }
+  .adtech-client-logo-img { width: 100%; height: auto; display: block; }
+  .adtech-client-text { font-size: 16px; font-weight: 500; color: var(--color-foreground, #000); }
+  .adtech-client-arrow {
+    width: 40px; height: 40px; background-color: #333; color: white;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    transition: background-color 0.3s ease; flex-shrink: 0;
+  }
+  .adtech-client-box:hover .adtech-client-arrow { background-color: #000; /* Adtech hover color, adjust if needed */ }
+
+  .adtech-image-column { /* Image on Right */
+    display: flex; justify-content: flex-end; align-items: center; height: 100%;
+  }
+  .adtech-image-container {
+    width: 763px; height: 410px; overflow: hidden;
+    border-radius: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+  .adtech-main-image { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .use-cases-heading-block { /* New class for specific margin control */
+    margin-top: 100px;  /* To create a 100px gap above */
+    margin-bottom: 0px;   /* To make gap below (to next wrapper's margin-top) also 100px */
   }
 </style>
