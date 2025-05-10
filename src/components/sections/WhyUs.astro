@@ -20,7 +20,7 @@ import OperationsExperience from './OperationsExperience.astro';
 
 <section>
   <Container>
-    <div class="texts">
+    <div class="texts animate fade-in">
       <SectionName>Why Aerospike Cloud</SectionName>
       <SectionHeading
         >The fully managed database that scales -without the hyperscale invoice</SectionHeading
@@ -29,7 +29,7 @@ import OperationsExperience from './OperationsExperience.astro';
 
     <!-- Original cost-comparison-layout -->
     <div class="cost-comparison-layout">
-      <div class="cost-comparison-left">
+      <div class="cost-comparison-left animate fade-up">
         <h2>Avoid hyperscaling invoices</h2>
         <div class="text-block">
           <h3>Do more, without paying per transaction</h3>
@@ -40,7 +40,7 @@ import OperationsExperience from './OperationsExperience.astro';
           <p>Run on AWS or GCP today—switch clouds or choose your own data center in the future.</p>
         </div>
       </div>
-      <div class="cost-comparison-right">
+      <div class="cost-comparison-right animate fade-up delay-200">
         <div class="comparison-card">
           <div class="card-text-content">
             <h4>Aerospike vs. DynamoDB</h4>
@@ -55,7 +55,7 @@ import OperationsExperience from './OperationsExperience.astro';
 
     <!-- New cost-comparison-layout for MongoDB Atlas -->
     <div class="cost-comparison-layout space-above">
-      <div class="cost-comparison-left">
+      <div class="cost-comparison-left animate fade-up">
         <h2>Give yourself headroom</h2>
         <div class="text-block">
           <h3>Ship fast and plan to last</h3>
@@ -66,7 +66,7 @@ import OperationsExperience from './OperationsExperience.astro';
           <p>Handle failovers, rebalancing, and reconfigurations automatically, with no dropped traffic, and no scrambling.</p>
         </div>
       </div>
-      <div class="cost-comparison-right">
+      <div class="cost-comparison-right animate fade-up delay-200">
         <div class="comparison-card">
           <div class="card-text-content">
             <h4>Aerospike vs. MongoDB Atlas</h4>
@@ -81,16 +81,15 @@ import OperationsExperience from './OperationsExperience.astro';
 
     <!-- Testimonial and Stats Section - Simplified Left Column -->
     <div class="testimonial-stats-layout space-above">
-      <div class="testimonial-image-column">
+      <div class="testimonial-image-column animate fade-in">
         <Image src={mediaImage} alt="Testimonial including Dream11 showcase" class="main-media-image" />
-        <!-- Removed the div.testimonial-card and its contents -->
       </div>
-      <div class="stats-column">
+      <div class="stats-column animate fade-up delay-200">
         <h3>When billions tune in, Dream11 can't drop the ball</h3>
         <p class="stats-subtext">
           The world's largest fantasy sports platform trusts Aerospike to manage data on <span class="aws-logo">AWS</span>
         </p>
-        <ul class="stats-list">
+        <ul class="stats-list stagger-children animate">
           <li class="stats-item">
             <Image src={iconStats1} alt="Data graph icon" class="stat-icon" />
             <span>35 TB added per day</span>
@@ -107,18 +106,20 @@ import OperationsExperience from './OperationsExperience.astro';
       </div>
     </div>
 
-    <!-- New "USE CASES" text block, styled like TrustAndSecurity.astro .texts -->
-    <div class="texts use-cases-heading-block"> 
+    
+
+    <OperationsExperience />
+  
+  <!-- New "USE CASES" text block, styled like TrustAndSecurity.astro .texts -->
+    <div class="texts use-cases-heading-block animate fade-in"> 
       <SectionName>USE CASES</SectionName>
       <SectionHeading>Trusted wherever 'good enough' isn't good enough</SectionHeading>
     </div>
 
-    <OperationsExperience />
-
     <!-- New Ad & Marketing Tech Section - Text Left, Image Right -->
     <div class="adtech-case-study-wrapper space-above">
       <div class="adtech-showcase-layout">
-        <div class="adtech-text-column"> {/* Text on the left */}
+        <div class="adtech-text-column animate fade-up"> {/* Text on the left */}
           <p class="adtech-category">Ad & marketing tech</p>
           <h2 class="adtech-title">User profile stores</h2>
           <p class="adtech-description">
@@ -126,7 +127,7 @@ import OperationsExperience from './OperationsExperience.astro';
             continuous writes—even as terabytes turn into petabytes.
           </p>
           
-          <div class="adtech-client-box">
+          <div class="adtech-client-box animate fade-in delay-200">
             <div class="adtech-client-info">
               <div class="adtech-client-logo-container">
                 <Image src={adtechLogoImage} alt="AdTech Partner Logo" class="adtech-client-logo-img" />
@@ -142,7 +143,7 @@ import OperationsExperience from './OperationsExperience.astro';
             </div>
           </div>
         </div>
-        <div class="adtech-image-column"> {/* Image on the right */}
+        <div class="adtech-image-column animate fade-in delay-300"> {/* Image on the right */}
           <div class="adtech-image-container">
              <Image src={adtechShowcaseImage} alt="Ad & marketing tech showcase" class="adtech-main-image" />
           </div>
@@ -154,12 +155,12 @@ import OperationsExperience from './OperationsExperience.astro';
     <!-- New Fintech Showcase Section - Image Left, Text Right -->
     <div class="fintech-case-study-wrapper space-above">
       <div class="fintech-showcase-layout">
-        <div class="fintech-image-column"> {/* Image on the left */}
+        <div class="fintech-image-column animate fade-in"> {/* Image on the left */}
           <div class="fintech-image-container">
              <Image src={fintechShowcaseImage} alt="Fintech application showcase" class="fintech-main-image" />
           </div>
         </div>
-        <div class="fintech-text-column"> {/* Text on the right */}
+        <div class="fintech-text-column animate fade-up delay-200"> {/* Text on the right */}
           <p class="fintech-category">Fintech</p>
           <h2 class="fintech-title">High-volume payments</h2>
           <p class="fintech-description">
@@ -167,7 +168,7 @@ import OperationsExperience from './OperationsExperience.astro';
             utilization to achieve industry-leading cost per payment.
           </p>
           
-          <div class="fintech-client-box">
+          <div class="fintech-client-box animate fade-in delay-300">
             <div class="fintech-client-text"> {/* Modified: No logo container */}
               <p>The largest payments app in America trusts<br>Aerospike with $1 trillion+ a year of volume.</p>
             </div>
@@ -185,7 +186,7 @@ import OperationsExperience from './OperationsExperience.astro';
     <!-- New Wayfair Showcase Section -->
     <div class="wayfair-case-study-wrapper space-above">
       <div class="wayfair-showcase-layout">
-        <div class="wayfair-showcase-left">
+        <div class="wayfair-showcase-left animate fade-up">
           <p class="wayfair-category">Ecommerce</p>
           <h2 class="wayfair-title">High-scale ML inference</h2>
           <p class="wayfair-description">
@@ -193,7 +194,7 @@ import OperationsExperience from './OperationsExperience.astro';
             satisfy your upstream SLOs—without prefetching.
           </p>
           
-          <div class="wayfair-client-box">
+          <div class="wayfair-client-box animate fade-in delay-200">
             <div class="wayfair-client-info">
               <div class="wayfair-client-logo-container">
                 <Image src={wayfairLogoImage} alt="Wayfair Logo" class="wayfair-client-logo-img" />

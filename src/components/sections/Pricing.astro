@@ -50,7 +50,7 @@ const pricingPlans = [
 
 <section class="transparent-pricing-section">
   <Container>
-    <div class="heading-container">
+    <div class="heading-container animate fade-in">
       <SectionName>Pricing</SectionName>
       <SectionHeading>Transparent pricing that doesn't tax your growth</SectionHeading>
     </div>
@@ -61,20 +61,22 @@ const pricingPlans = [
 
 <section id="pricing" class="pricing-section">
   <Container>
-    <div class="texts">
+    <div class="texts animate fade-in">
       <SectionHeading>Pricing Examples</SectionHeading>
       <p>Contact us for a detailing sizing and pricing estimate based on your workload</p>
     </div>
     
     <div class="cards">
-      {pricingPlans.map((plan) => (
-        <PricingCard
-          title={plan.title}
-          sizeIndicator={plan.sizeIndicator}
-          price={plan.price}
-          description={plan.description}
-          specifications={plan.specifications}
-        />
+      {pricingPlans.map((plan, index) => (
+        <div class={`animate fade-up delay-${index * 100}`}>
+          <PricingCard
+            title={plan.title}
+            sizeIndicator={plan.sizeIndicator}
+            price={plan.price}
+            description={plan.description}
+            specifications={plan.specifications}
+          />
+        </div>
       ))}
     </div>
   </Container>

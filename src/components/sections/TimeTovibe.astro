@@ -60,10 +60,10 @@ const iconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xml
 
 <section class="time-to-vibe-section">
   <div class="content-wrapper">
-    <p class="subtitle">DEVELOPERS & ARCHITECTS</p>
-    <h2 class="main-heading">Accelerated time-to-vibe</h2>
+    <p class="subtitle animate fade-in">DEVELOPERS & ARCHITECTS</p>
+    <h2 class="main-heading animate fade-in delay-100">Accelerated time-to-vibe</h2>
 
-    <div class="code-block-container">
+    <div class="code-block-container animate fade-up delay-200">
       <div class="code-block-header">
         <span class="dot red"></span>
         <span class="dot yellow"></span>
@@ -73,11 +73,11 @@ const iconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xml
     </div>
 
     <div class="value-props-grid">
-      {columns.map(column => (
-        <div class="value-prop-column">
+      {columns.map((column, columnIndex) => (
+        <div class={`value-prop-column animate fade-up delay-${300 + (columnIndex * 100)}`}>
           <h3>{column.mainTitle}</h3>
           {column.props.map(prop => (
-            <div class="prop-item">
+            <div class="prop-item animate fade-in delay-400">
               <div class="prop-icon">
                 {/* Placeholder for icon - could be an <Image /> component or SVG */}
                 <Fragment set:html="<!-- Icon -->" />

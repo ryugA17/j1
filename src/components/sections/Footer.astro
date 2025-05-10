@@ -101,15 +101,15 @@ const footerLinks = {
 
 <footer class="footer">
   <Container>
-    <div class="logo-and-links">
+    <div class="logo-and-links animate fade-in">
       <div class="logo">
         <img src="/images/footer-logo.png" alt="Aerospike Logo" />
       </div>
       <div class="footer-links">
-        <div class="products-and-integrations">
+        <div class="products-and-integrations animate fade-up delay-100">
           <div>
             <span class="section-title">Products</span>
-            <ul>
+            <ul class="stagger-children animate">
               {
                 footerLinks.products.map(({ label, href }) => {
                   return (
@@ -123,7 +123,7 @@ const footerLinks = {
           </div>
           <div>
             <span class="section-title">Integrations</span>
-            <ul>
+            <ul class="stagger-children animate">
               {
                 footerLinks.integrations.map(({ label, href }) => {
                   return (
@@ -136,9 +136,9 @@ const footerLinks = {
             </ul>
           </div>
         </div>
-        <div>
+        <div class="animate fade-up delay-200">
           <span class="section-title">Solutions</span>
-          <ul>
+          <ul class="stagger-children animate">
             {
               footerLinks.solutions.map(({ label, href }) => {
                 return (
@@ -150,9 +150,9 @@ const footerLinks = {
             }
           </ul>
         </div>
-        <div>
+        <div class="animate fade-up delay-300">
           <span class="section-title">Company</span>
-          <ul>
+          <ul class="stagger-children animate">
             {
               footerLinks.company.map(({ label, href }) => {
                 return (
@@ -164,7 +164,7 @@ const footerLinks = {
             }
           </ul>
         </div>
-        <div>
+        <div class="animate fade-up delay-400">
           <span class="section-title">Contact</span>
           <ul>
             <li>1-408-462-AERO (2378)</li>
@@ -177,8 +177,8 @@ const footerLinks = {
 
     <!-- BOTTOM STUFF -->
     <hr />
-    <div class="logos-and-credit">
-      <div class="logos">
+    <div class="logos-and-credit animate fade-in delay-300">
+      <div class="logos stagger-children animate">
         {
           socialLinks.map(({ logoPath, href, name }) => {
             return (
@@ -191,7 +191,7 @@ const footerLinks = {
       </div>
       <span>@2025 Aerospike, Inc - All rights reserved</span>
     </div>
-    <p>
+    <p class="animate fade-in delay-500">
       Disclaimer text: Sed ut perspiciatis unde omnis iste natus error sit
       voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque
       ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae

@@ -12,7 +12,7 @@ export function initHeroWidgetsAnimation(targetElementId) {
     renderer: 'svg',
     loop: false,
     autoplay: false,
-    path: '/animations/widgets.json',
+    path: '/animations/files.json',
   });
 
   animation.addEventListener('DOMLoaded', () => {

@@ -9,17 +9,17 @@ const navLinks = [
 ];
 ---
 
-<nav class="navbar" role="navigation" aria-label="Main navigation">
+<nav class="navbar animate fade-in" role="navigation" aria-label="Main navigation">
   <Container>
     <div class="nav-container">
-      <div class="logo">
+      <div class="logo animate fade-right">
         <img src="/images/logo.png" alt="Aerospike logo" />
       </div>
-      <div class="menu-icon">
+      <div class="menu-icon animate fade-in delay-200">
         <img src="/images/menu.png" alt="Menu Icon" />
       </div>
 
-      <ul class="nav-links">
+      <ul class="nav-links stagger-children animate">
         {
           navLinks.map((link) => (
             <li>
@@ -32,8 +32,8 @@ const navLinks = [
       </ul>
 
       <div class="nav-actions">
-        <a href="/contact" class="nav-link">Contact</a>
-        <a href="/signup" class="nav-link">Login</a>
+        <a href="/contact" class="nav-link animate fade-left delay-300">Contact</a>
+        <a href="/signup" class="nav-link animate fade-left delay-400">Login</a>
       </div>
     </div>
   </Container>
