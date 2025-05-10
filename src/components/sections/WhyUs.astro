@@ -524,6 +524,8 @@ import adtechLogoImage from '../../assets/b1.png'; // New AdTech logo
     .adtech-description { font-size: 16px; }
     .adtech-client-box {
       flex-direction: column; align-items: flex-start; gap: 16px;
+      width: 100%;
+      height: auto;
     }
     .adtech-client-info { width: 100%; }
     .adtech-client-arrow { align-self: flex-end; }
@@ -571,7 +573,7 @@ import adtechLogoImage from '../../assets/b1.png'; // New AdTech logo
   
   .wayfair-title {
     font-size: 36px;
-    font-weight: 700;
+    font-weight: 500;
     color: #000;
     margin-bottom: 16px;
     line-height: 1.2;
@@ -762,7 +764,7 @@ import adtechLogoImage from '../../assets/b1.png'; // New AdTech logo
   
   .fintech-title {
     font-size: 36px;
-    font-weight: 700;
+    font-weight: 500;
     color: #000;
     margin-bottom: 16px;
     line-height: 1.2;
@@ -858,7 +860,12 @@ import adtechLogoImage from '../../assets/b1.png'; // New AdTech logo
     font-size: 18px; color: #888; margin-bottom: 12px;
   }
   .adtech-title {
-    font-size: 36px; font-weight: 700; color: #000; margin-bottom: 16px; line-height: 1.2;
+    font-family: "Helvetica Now Display", sans-serif;
+    font-size: 36px; 
+    font-weight: 500; 
+    color: #1A1A1A;
+    margin-bottom: 16px; 
+    line-height: 1.2;
   }
   .adtech-description {
     font-size: 18px; line-height: 1.5; color: #555; margin-bottom: 32px;
@@ -866,9 +873,16 @@ import adtechLogoImage from '../../assets/b1.png'; // New AdTech logo
   
   .adtech-client-box {
     display: flex; align-items: center; justify-content: space-between;
-    background-color: #f9f9f9; border-radius: 12px; padding: 20px;
+    background-color: #f9f9f9; 
+    border-radius: 10px;
+    padding: 20px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; width: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease; 
+    cursor: pointer; 
+    width: 412px;
+    max-width: 100%;
+    height: 96px;
+    gap: 10px;
   }
   .adtech-client-box:hover {
     transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
