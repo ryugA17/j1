@@ -2,15 +2,17 @@
 interface Props {
   text?: string;
   showAfterAnimation?: boolean;
+  heroOnly?: boolean;
 }
 
 const { 
   text = "Scroll to continue", 
-  showAfterAnimation = true 
+  showAfterAnimation = true,
+  heroOnly = false
 } = Astro.props;
 ---
 
-<div class="scroll-indicator" data-show-after-animation={showAfterAnimation.toString()}>
+<div class={`scroll-indicator ${heroOnly ? 'hero-only' : ''}`} data-show-after-animation={showAfterAnimation.toString()} data-hero-only={heroOnly.toString()}>
   <div class="scroll-indicator-text">{text}</div>
   <div class="scroll-indicator-arrow">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -26,6 +28,7 @@ const {
     const indicators = document.querySelectorAll('.scroll-indicator');
     indicators.forEach(indicator => {
       const showAfterAnimation = indicator.getAttribute('data-show-after-animation') === 'true';
+      const heroOnly = indicator.getAttribute('data-hero-only') === 'true';
       
       if (showAfterAnimation) {
         indicator.classList.add('hidden');
@@ -44,6 +47,39 @@ const {
         // Show immediately if not waiting for animation
         indicator.classList.add('visible');
         console.log("ScrollIndicator: Immediately visible");
+      }
+      
+      // Handle hero-only indicator visibility
+      if (heroOnly) {
+        // Show only when in viewport
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            const heroSection = document.getElementById('hero-section');
+            if (heroSection && entry.isIntersecting) {
+              indicator.style.opacity = '1';
+            } else {
+              indicator.style.opacity = '0';
+            }
+          });
+        }, { threshold: 0.1 });
+        
+        const heroSection = document.getElementById('hero-section');
+        if (heroSection) {
+          observer.observe(heroSection);
+        }
+        
+        // Also hide when scrolling past hero section
+        window.addEventListener('scroll', () => {
+          const heroSection = document.getElementById('hero-section');
+          if (heroSection) {
+            const heroBottom = heroSection.getBoundingClientRect().bottom;
+            if (heroBottom < 0) {
+              indicator.style.opacity = '0';
+            } else {
+              indicator.style.opacity = '1';
+            }
+          }
+        });
       }
     });
   });
@@ -70,6 +106,11 @@ const {
   
   .scroll-indicator.hidden {
     opacity: 0;
+  }
+  
+  /* When outside the hero section, hide the indicator */
+  .scroll-indicator.hero-only:not(.in-hero-section) {
+    display: none;
   }
   
   .scroll-indicator-text {

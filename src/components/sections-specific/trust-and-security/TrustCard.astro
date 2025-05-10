@@ -1,0 +1,40 @@
+---
+const { description, title, imgSrc } = Astro.props;
+---
+
+<div>
+  <div class="card-image"><img src={imgSrc} alt={title} /></div>
+  <div class="texts">
+    <h4>
+      {title}
+    </h4>
+    <p>
+      {description}
+    </p>
+  </div>
+</div>
+
+<style>
+  .card-image img {
+    width: 100%;
+  }
+  .card-image {
+    width: 100%;
+  }
+
+  h4 {
+    font-size: 24px;
+    font-weight: 500;
+  }
+  p {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--color-muted-foreground);
+  }
+  .texts {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-top: 30px;
+  }
+</style>

@@ -185,13 +185,7 @@ import ScrollTrigger from "../shared/ScrollTrigger.astro";
   </div>
 
   <!-- Scroll indicator appears at the bottom -->
-  <ScrollIndicator text="SCROLL TO EXPLORE" showAfterAnimation={true} />
-
-  <!-- Add scroll indicator that appears when animation completes -->
-  <div class="scroll-indicator hidden" id="scroll-indicator">
-    <div class="scroll-text">Scroll Down</div>
-    <div class="scroll-arrow">↓</div>
-  </div>
+  <ScrollIndicator text="SCROLL TO EXPLORE" showAfterAnimation={true} heroOnly={true} />
 </section>
 
 <script>
@@ -506,13 +500,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Animation nearly complete, unlocking scroll');
         document.body.classList.remove('scroll-locked');
         heroSection.classList.remove('locked');
-        
-        // Show scroll indicator
-        const scrollIndicator = document.getElementById('scroll-indicator');
-        if (scrollIndicator) {
-          scrollIndicator.classList.remove('hidden');
-          scrollIndicator.classList.add('visible');
-        }
         
         // Show continue button
         const continueButton = document.querySelector('.continue-button');
@@ -1234,44 +1221,6 @@ document.addEventListener('DOMContentLoaded', () => {
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
   }
 
-  /* Scroll indicator styles */
-  .scroll-indicator {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: white;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-  }
-  
-  .scroll-indicator.visible {
-    opacity: 1;
-  }
-  
-  .scroll-indicator.hidden {
-    opacity: 0;
-  }
-  
-  .scroll-text {
-    font-size: 14px;
-    margin-bottom: 5px;
-  }
-  
-  .scroll-arrow {
-    font-size: 24px;
-    animation: bounce 1s infinite alternate;
-  }
-  
-  @keyframes bounce {
-    from {
-      transform: translateY(0px);
-    }
-    to {
-      transform: translateY(10px);
-    }
-  }
+  /* Updated Scroll Indicator styling handled by ScrollIndicator component */
+}
 </style> 

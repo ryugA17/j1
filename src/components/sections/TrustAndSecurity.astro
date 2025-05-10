@@ -1,0 +1,82 @@
+---
+import SectionName from "../shared/SectionName.astro";
+import SectionHeading from "../shared/SectionHeading.astro";
+import TrustCard from "../sections-specific/trust-and-security/TrustCard.astro";
+import SecurityCard from "../sections-specific/trust-and-security/SecurityCard.astro";
+---
+
+<section>
+  <div class="texts">
+    <SectionName>TRUST & SECURITY</SectionName>
+    <SectionHeading
+      >We build it. We run it. We pick up the phone.</SectionHeading
+    >
+  </div>
+  <div class="trust-cards">
+    <TrustCard
+      title="Proactive observabiliy"
+      description="Easily integrates to your existing observability tools, includin Datalog and Grafana."
+      imgSrc="/images/trust.png"
+    />
+    <TrustCard
+      title="World-class globaal support"
+      description="24/7 assistaance from the engineers who built Aerospike."
+      imgSrc="/images/support.png"
+    />
+  </div>
+  <div class="security-cards">
+    <SecurityCard
+      title="SOC2 certified"
+      description="Independently audited . Type II attestation available upon request."
+      imgSrc="/images/security-1.svg"
+    />
+    <SecurityCard
+      title="VPC isolation & private peering"
+      description="Traffic stays private, with no exposure to the public internet."
+      imgSrc="/images/security-2.svg"
+    />
+    <SecurityCard
+      title="Encryption at rest and in transit "
+      description="Encryption is on by default — your data stays protected and in your hands."
+      imgSrc="/images/security-3.svg"
+    />
+    <SecurityCard
+      title="Standard 99.95% SLA"
+      description="We stand behind every cluster. Custom SLAs available when you need five nines."
+      imgSrc="/images/security-4.svg"
+    />
+  </div>
+</section>
+
+<style>
+  section {
+    padding: 60px 0;
+  }
+  .security-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 80px;
+  }
+  .trust-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 80px;
+  }
+  .texts {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+    margin-top: 40px;
+  }
+  @media (max-width: 1024px) {
+    .trust-cards {
+      grid-template-columns: 1fr;
+    }
+    .security-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

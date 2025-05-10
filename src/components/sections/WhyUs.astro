@@ -9,6 +9,9 @@ import mediaImage from '../../assets/Media.png'; // This image contains the test
 import iconStats1 from '../../assets/Frame 2147204653.png';
 import iconStats2 from '../../assets/Group 10124044.png';
 import iconStats3 from '../../assets/Frame 2147204652.png';
+import wayfairShowcaseImage from '../../assets/g1.jpg';
+import wayfairLogoImage from '../../assets/wayfair.png';
+import fintechShowcaseImage from '../../assets/g2.jpg'; // New image import
 // Removed dream11Logo and amitGardeImage imports as they are part of mediaImage
 ---
 
@@ -100,6 +103,73 @@ import iconStats3 from '../../assets/Frame 2147204652.png';
         </ul>
       </div>
     </div>
+
+    <!-- New Fintech Showcase Section - Image Left, Text Right -->
+    <div class="fintech-case-study-wrapper space-above">
+      <div class="fintech-showcase-layout">
+        <div class="fintech-image-column"> {/* Image on the left */}
+          <div class="fintech-image-container">
+             <Image src={fintechShowcaseImage} alt="Fintech application showcase" class="fintech-main-image" />
+          </div>
+        </div>
+        <div class="fintech-text-column"> {/* Text on the right */}
+          <p class="fintech-category">Fintech</p>
+          <h2 class="fintech-title">High-volume payments</h2>
+          <p class="fintech-description">
+            Combine strong consistency with unmatched infrastructure
+            utilization to achieve industry-leading cost per payment.
+          </p>
+          
+          <div class="fintech-client-box">
+            <div class="fintech-client-text"> {/* Modified: No logo container */}
+              <p>The largest payments app in America trusts<br>Aerospike with $1 trillion+ a year of volume.</p>
+            </div>
+            <div class="fintech-client-arrow">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {/* End of New Fintech Showcase Section */}
+
+    <!-- New Wayfair Showcase Section -->
+    <div class="wayfair-case-study-wrapper space-above">
+      <div class="wayfair-showcase-layout">
+        <div class="wayfair-showcase-left">
+          <p class="wayfair-category">Ecommerce</p>
+          <h2 class="wayfair-title">High-scale ML inference</h2>
+          <p class="wayfair-description">
+            Retrieve large feature sets at low p99 latency to reliably 
+            satisfy your upstream SLOs—without prefetching.
+          </p>
+          
+          <div class="wayfair-client-box">
+            <div class="wayfair-client-info">
+              <div class="wayfair-client-logo-container">
+                <Image src={wayfairLogoImage} alt="Wayfair Logo" class="wayfair-client-logo-img" />
+              </div>
+              <div class="wayfair-client-text">
+                <p>How Wayfair powers real-time <br>product recommendations</p>
+              </div>
+            </div>
+            <div class="wayfair-client-arrow">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="wayfair-showcase-right">
+          <div class="wayfair-image-container">
+             <Image src={wayfairShowcaseImage} alt="Wayfair website on laptop" class="wayfair-main-image" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- End of New Wayfair Showcase Section -->
 
   </Container>
 </section>
@@ -291,17 +361,46 @@ import iconStats3 from '../../assets/Frame 2147204652.png';
 
   @media (max-width: 1024px) {
     .cost-comparison-layout,
-    .testimonial-stats-layout {
+    .testimonial-stats-layout,
+    .fintech-case-study-wrapper .fintech-showcase-layout,
+    .wayfair-case-study-wrapper .wayfair-showcase-layout {
       flex-direction: column;
       gap: 30px;
+      height: auto;
+      align-items: stretch;
     }
     .cost-comparison-left,
     .cost-comparison-right,
     .testimonial-image-column,
-    .stats-column {
+    .stats-column,
+    .fintech-image-column,
+    .fintech-text-column,
+    .wayfair-showcase-left, 
+    .wayfair-showcase-right {
       width: 100%;
+      max-width: 100%;
     }
-    /* Removed .testimonial-card responsive styles as it's part of the image now */
+    .wayfair-showcase-left {
+      gap: 16px;
+    }
+    .wayfair-image-container {
+        width: 100%;
+        max-width: 763px;
+        margin: 0 auto;
+        height: auto;
+        aspect-ratio: 763 / 410;
+    }
+    .wayfair-title {
+        font-size: 28px;
+    }
+    .wayfair-description {
+        font-size: 16px;
+        margin-bottom: 24px;
+    }
+    .fintech-title,
+    .fintech-description {
+        /* Consider adjusting font sizes for fintech section if needed at this breakpoint */
+    }
   }
 
   @media (max-width: 768px) {
@@ -322,5 +421,339 @@ import iconStats3 from '../../assets/Frame 2147204652.png';
     .stats-column h3 {
       font-size: 1.5rem;
     }
+
+    .wayfair-case-study-wrapper {
+      padding-top: 40px;
+      padding-bottom: 80px;
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+    .wayfair-client-box {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .wayfair-client-info {
+      width: 100%;
+    }
+    .wayfair-client-arrow {
+      align-self: flex-end;
+    }
+
+    .fintech-case-study-wrapper {
+      padding-top: 40px;
+      padding-bottom: 80px;
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+    .fintech-title {
+      font-size: 28px; 
+    }
+    .fintech-description {
+      font-size: 16px;
+    }
+    .fintech-client-box {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .fintech-client-text {
+        width: 100%;
+        margin-right: 0;
+    }
+    .fintech-client-arrow {
+      align-self: flex-end;
+    }
+  }
+
+  /* New Wayfair Showcase Section Styles - Revised */
+  .wayfair-case-study-wrapper {
+    background-color:rgb(255, 255, 255);
+    padding-top: 60px;
+    padding-bottom: 120px;
+    border-radius: 20px;
+    margin-left: calc(-1 * var(--container-padding, 0px));
+    margin-right: calc(-1 * var(--container-padding, 0px));
+    padding-left: var(--container-padding, 60px);
+    padding-right: var(--container-padding, 60px);
+  }
+
+  .wayfair-case-study-wrapper.space-above {
+    margin-top: 100px;
+  }
+
+  .wayfair-showcase-layout {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 410px;
+    max-width: 1320px;
+    margin: 0 auto;
+    gap: 20px;
+  }
+
+  .wayfair-showcase-left {
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+  }
+  
+  .wayfair-category {
+    font-size: 18px;
+    color: #888;
+    margin-bottom: 12px;
+  }
+  
+  .wayfair-title {
+    font-size: 36px;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+  
+  .wayfair-description {
+    font-size: 18px;
+    line-height: 1.5;
+    color: #555;
+    margin-bottom: 32px;
+  }
+  
+  .wayfair-client-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    width: 100%;
+  }
+  
+  .wayfair-client-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  .wayfair-client-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .wayfair-client-logo-container {
+    width: 100px;
+    flex-shrink: 0;
+  }
+
+  .wayfair-client-logo-img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  .wayfair-client-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-foreground, #000);
+  }
+  
+  .wayfair-client-arrow {
+    width: 40px;
+    height: 40px;
+    background-color: #333;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0;
+  }
+  
+  .wayfair-client-box:hover .wayfair-client-arrow {
+    background-color: #7b1fa2;
+  }
+
+  .wayfair-showcase-right {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 100%;
+  }
+
+  .wayfair-image-container {
+    width: 763px;
+    height: 410px;
+    overflow: hidden;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  .wayfair-main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  @media (max-width: 1440px) {
+    .wayfair-case-study-wrapper {
+        /* Adjust padding for smaller screens if needed, e.g., padding-left/right: 30px */
+    }
+    .wayfair-showcase-layout {
+        max-width: 100%;
+        /* height: auto; */
+        /* flex-direction: column; */
+        /* gap: 40px; */
+    }
+    .wayfair-showcase-left, 
+    .wayfair-showcase-right {
+      width: 100%;
+      max-width: 100%;
+    }
+    .wayfair-showcase-left {
+      gap: 16px;
+    }
+    .wayfair-image-container {
+        width: 100%;
+        max-width: 763px;
+        margin: 0 auto;
+        height: auto;
+        aspect-ratio: 763 / 410;
+    }
+    .wayfair-title {
+        font-size: 28px;
+    }
+    .wayfair-description {
+        font-size: 16px;
+        margin-bottom: 24px;
+    }
+  }
+
+  /* New Fintech Showcase Section Styles */
+  .fintech-case-study-wrapper {
+    background-color: rgb(255, 255, 255); /* White background */
+    padding-top: 60px;
+    padding-bottom: 120px;
+    border-radius: 20px;
+    margin-left: calc(-1 * var(--container-padding, 0px));
+    margin-right: calc(-1 * var(--container-padding, 0px));
+    padding-left: var(--container-padding, 60px);
+    padding-right: var(--container-padding, 60px);
+  }
+
+  .fintech-case-study-wrapper.space-above {
+    margin-top: 100px;
+  }
+
+  .fintech-showcase-layout {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 410px;
+    max-width: 1320px;
+    margin: 0 auto;
+    gap: 20px; /* Gap between image and text columns */
+  }
+
+  .fintech-image-column { /* Was .wayfair-showcase-right */
+    display: flex;
+    justify-content: flex-start; /* Align image container to the left */
+    align-items: center;
+    height: 100%;
+  }
+  
+  .fintech-image-container {
+    width: 763px;
+    height: 410px;
+    overflow: hidden;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .fintech-main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .fintech-text-column { /* Was .wayfair-showcase-left */
+    max-width: 480px; /* Updated from 500px */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+  }
+  
+  .fintech-category {
+    font-size: 18px;
+    color: #888;
+    margin-bottom: 12px;
+  }
+  
+  .fintech-title {
+    font-size: 36px;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+  
+  .fintech-description {
+    font-size: 18px;
+    line-height: 1.5;
+    color: #555;
+    margin-bottom: 32px;
+  }
+  
+  .fintech-client-box { /* Adapted from .wayfair-client-box */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    width: 100%;
+  }
+  
+  .fintech-client-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* .fintech-client-info was here, removed as direct children are now text and arrow */
+  
+  .fintech-client-text { /* Text now a direct child of client-box */
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-foreground, #000);
+    flex-grow: 1; /* Allow text to take available space */
+    margin-right: 16px; /* Add some space between text and arrow */
+  }
+  
+  .fintech-client-arrow { /* Adapted from .wayfair-client-arrow */
+    width: 40px;
+    height: 40px;
+    background-color: #333;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0;
+  }
+  
+  .fintech-client-box:hover .fintech-client-arrow {
+    background-color: #000; /* Example hover, can be themed */
   }
 </style>
