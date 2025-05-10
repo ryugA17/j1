@@ -215,10 +215,14 @@ const pricingDetails = [
 
   @media (max-width: 600px) {
     .how-pricing-works-section {
-      padding: 30px 15px; /* Further reduce outer padding */
+      padding: 30px 0;
     }
     .how-pricing-content-grid {
-        padding: 30px 20px; /* Further reduce internal padding */
+        padding: 25px 20px; /* Internal padding for content */
+        width: 100%; /* Fill the parent Container */
+        /* margin-left: calc(50% - 50vw); */ /* Removed for non-bleed */
+        border-radius: 20px; /* Restore rounded corners */
+        box-sizing: border-box;
     }
     .details-grid {
       grid-template-columns: 1fr;

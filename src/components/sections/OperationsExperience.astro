@@ -330,6 +330,7 @@ const timeToVibeIconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill=
   }
   .ops-content-panel.is-active { /* Desktop: Show active panel */
     display: flex;
+    flex-direction: row-reverse; /* Text on left, image on right */
   }
 
   .panel-text-content {
@@ -661,10 +662,12 @@ const timeToVibeIconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill=
   /* Responsive adjustments */
   @media (max-width: 1440px) { /* Matches fixed width, adjust for fluidity */
     .grid-accent-section {
-      width: 100%;
-      height: auto; /* Allow height to adjust based on content */
-      min-height: 100vh; /* Ensure it takes at least viewport height */
-      padding: 80px 30px 100px; /* Adjusted padding */
+     
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      padding-left: 0;
+      padding-right: 0;
+      box-sizing: border-box;
     }
      .grid-accent-section::before {
       top: 40px; left: 15px; right: 15px; bottom: 50px;
