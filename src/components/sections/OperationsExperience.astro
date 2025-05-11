@@ -159,20 +159,31 @@ const timeToVibeIconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill=
     const contentPanels = document.querySelectorAll('.ops-content-panel');
     const mobileSelect = document.getElementById('ops-select-mobile');
 
-    // --- Populate Mobile Dropdown --- 
+    // --- Populate Mobile Dropdown ---
     if (mobileSelect && features && features.length > 0) {
-      features.forEach((feature, index) => {
+      features.forEach((feature) => { // 'index' argument removed as it's not used for this logic
+        if (feature.id === "click-ops") {
+          return; // Skip "Powerful click-ops"
+        }
         const option = document.createElement('option');
         option.value = feature.id;
         option.textContent = feature.navTitle;
-        if (index === 0) {
-          option.selected = true;
+        if (feature.id === "rapid-deployment") {
+          option.selected = true; // Set "Rapid deployment" as selected
         }
         mobileSelect.appendChild(option);
       });
+
+      // After populating, if on mobile, ensure the correct panel is shown.
+      // This also covers the initial load scenario for mobile.
+      if (window.innerWidth <= 768) {
+        // Clear any existing mobile-selected states first to ensure a clean state
+        contentPanels.forEach(panel => panel.classList.remove('is-selected-mobile'));
+        handleMobileSelection(); // This will show the panel for 'rapid-deployment' or the first available option
+      }
     }
 
-    // --- Desktop Navigation Logic --- 
+    // --- Desktop Navigation Logic --- (This part remains unchanged)
     desktopNavItems.forEach(item => {
       item.addEventListener('click', () => {
         const targetId = item.getAttribute('data-target');
@@ -189,7 +200,7 @@ const timeToVibeIconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill=
       });
     });
 
-    // --- Mobile Dropdown Logic --- 
+    // --- Mobile Dropdown Logic --- (This function definition remains unchanged)
     function handleMobileSelection() {
       if (!mobileSelect) return;
       const selectedId = mobileSelect.value;
@@ -204,17 +215,10 @@ const timeToVibeIconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill=
 
     if (mobileSelect) {
       mobileSelect.addEventListener('change', handleMobileSelection);
-      // Initial load: set the first panel visible for mobile
-      if (features && features.length > 0) {
-         // Ensure panels are correctly initialized regarding desktop 'is-active'
-        contentPanels.forEach((panel, idx) => {
-            if (idx === 0) {
-                if(window.innerWidth <= 768) panel.classList.add('is-selected-mobile');
-            } else {
-                panel.classList.remove('is-selected-mobile');
-            }
-        });
-      }
+      // The block that was previously here for initial mobile panel setup:
+      // e.g., if (features && features.length > 0) { ... panel.classList.add('is-selected-mobile') ... }
+      // is now removed. The logic for initial mobile display is handled after 
+      // the dropdown population (within the 'if (window.innerWidth <= 768)' block above).
     }
   });
 </script>
